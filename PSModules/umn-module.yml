@@ -1,0 +1,13 @@
+# template
+
+parameters:
+- name: ModuleName
+  type: string
+
+stages:
+- template: build-module.yml
+  parameters:
+    ModuleName: ${{ parameters.ModuleName }}
+- template: deploy-module.yml
+  parameters:
+    ModuleName: ${{ parameters.ModuleName }}

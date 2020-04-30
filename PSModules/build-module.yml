@@ -1,0 +1,25 @@
+parameters:
+- name: ModuleName
+  type: string
+
+stages:
+- stage: Build
+  jobs:
+    - job: Build
+      steps:
+        # https://github.com/PoshCode/Azure-Pipelines/blob/master/Install-RequiredModule-step.yml
+        - powershell: |
+            # Apparently, Install-Script isn't good enough except on Windows?
+            # Install-Script Install-RequiredModule -Force -Verbose
+            Save-Script Install-RequiredModule -Path '$(Pipeline.Workspace)'
+            &"$(Pipeline.Workspace)/Install-RequiredModule" -Path '$(Build.SourcesDirectory)/RequiredModules.psd1' -Confirm:$false -Verbose
+            foreach ($installErr in $IRM_InstallErrors) {
+                Write-Warning "ERROR: $installErr"
+                Write-Warning "STACKTRACE: $($installErr.ScriptStackTrace)"
+            }
+          displayName: 'Restore pre-requisites'
+        - powershell: |
+            Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}'
+          displayName: 'Build Module'
+        - publish: $(Build.ArtifactStagingDirectory)
+          artifact: ${{ parameters.ModuleName }}

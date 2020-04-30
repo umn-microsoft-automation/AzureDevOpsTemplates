@@ -1,0 +1,93 @@
+parameters:
+- name: ModuleName
+  type: string
+
+stages:
+- stage: Deploy
+  dependsOn: Build
+  condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+  jobs:
+    - job: Publish
+      pool: Default
+      workspace:
+        clean: all
+      steps:
+      - checkout: none
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          artifactName: ${{ parameters.ModuleName }}
+          targetPath: $(Build.ArtifactStagingDirectory)
+      - powershell: |
+          $repoPath = "\\files.umn.edu\OIT\Lines\MPT\PowershellRepository"
+          $repoName = "MPTLocalFSRepo"
+          $mptLocalFSRepo = Get-PSRepository | Where-Object name -eq $repoName
+          if (-not $mptLocalFSRepo) {
+            Write-Host "Repo not found, creating"
+            Register-PSRepository -Name $repoName -SourceLocation $repoPath -PublishLocation $repoPath -ScriptSourceLocation $repoPath -ScriptPublishLocation $repoPath -InstallationPolicy Trusted
+          } elseif ($mptLocalFSRepo.SourceLocation -ne $repoPath) {
+            Write-Host "Repo found but wrong location, deleting and recreating"
+            Unregister-PSRepository -Name $repoName
+            Register-PSRepository -Name $repoName -SourceLocation $repoPath -PublishLocation $repoPath -ScriptSourceLocation $repoPath -ScriptPublishLocation $repoPath -InstallationPolicy Trusted
+          }
+        displayName: Register Repository
+      - powershell: |
+          $version = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').Version.ToString()
+          Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -Repository 'MPTLocalFSRepo' -Force
+          Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
+          Write-Host "##vso[task.setvariable variable=PackageVersion;isOutput=true]$version"
+        displayName: Publish Module
+        name: PublishModule
+    - deployment: Production
+      dependsOn: Publish
+      variables:
+        PackageVersion: $[ dependencies.Publish.outputs['PublishModule.PackageVersion']]
+      environment:
+        name: Production
+        resourceType: VirtualMachine
+      strategy:
+        rolling:
+          preDeploy:
+            steps:
+              - powershell: |
+                  $repopath = '\\files.umn.edu\OIT\Lines\MPT\PowershellRepository'
+                  $reponame = 'MPTLocalFSRepo'
+                  $Splat = @{
+                    Name       = 'PSRepository'
+                    ModuleName = @{
+                      ModuleName    = 'PowershellGet'
+                      ModuleVersion = '2.2.4'
+                    }
+                    Property   = @{
+                      Name                  = $reponame
+                      SourceLocation        = $repopath
+                      PublishLocation       = $repopath
+                      ScriptSourceLocation  = $repopath
+                      ScriptPublishLocation = $repopath
+                      InstallationPolicy    = 'Trusted'
+                    }
+                    Method     = 'Set'
+                  }
+                  Invoke-DscResource @Splat -Verbose -ErrorAction Stop
+                  Get-PSRepository
+                displayName: Register Repository
+          deploy:
+            steps:
+              - download: none
+              - powershell: |
+                  Get-PSRepository
+                  find-module -Repository MPTLocalFSRepo
+                  $LatestVersion = '$(PackageVersion)'
+                  $Splat = @{
+                      Name       = 'PSModule'
+                      ModuleName = @{
+                          ModuleName = 'PowershellGet'
+                          ModuleVersion = '2.2.4'
+                      }
+                      Property   = @{
+                          Name           = '${{ parameters.ModuleName }}'
+                          MinimumVersion = $LatestVersion
+                          Ensure         = 'Present'
+                      }
+                      Method = 'Set'
+                  }
+                  Invoke-DscResource @Splat -Verbose -ErrorAction Stop
