@@ -50,8 +50,9 @@ stages:
         resourceType: VirtualMachine
       strategy:
         rolling:
-          preDeploy:
+          deploy:
             steps:
+              - download: none
               - powershell: |
                   $repopath = '${{ parameters.RepoPath }}'
                   $reponame = '${{ parameters.RepoName }}'
@@ -74,9 +75,6 @@ stages:
                   Invoke-DscResource @Splat -Verbose -ErrorAction Stop
                   Get-PSRepository
                 displayName: Register Repository
-          deploy:
-            steps:
-              - download: none
               - powershell: |
                   Get-PSRepository
                   find-module -Repository '${{ parameters.RepoName }}'
