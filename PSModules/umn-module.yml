@@ -3,6 +3,10 @@
 parameters:
 - name: ModuleName
   type: string
+- name: RepoPath
+  type: string
+- name: RepoName
+  type: string
 
 stages:
 - template: build-module.yml
@@ -11,3 +15,5 @@ stages:
 - template: deploy-module.yml
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
+    RepoPath: ${{ parameters.RepoPath }}
+    RepoName: ${{ parameters.RepoName }}

@@ -1,6 +1,10 @@
 parameters:
 - name: ModuleName
   type: string
+- name: RepoPath
+  type: string
+- name: RepoName
+  type: string
 
 stages:
 - stage: Deploy
@@ -18,13 +22,13 @@ stages:
           artifactName: ${{ parameters.ModuleName }}
           targetPath: $(Build.ArtifactStagingDirectory)
       - powershell: |
-          $repoPath = "\\files.umn.edu\OIT\Lines\MPT\PowershellRepository"
-          $repoName = "MPTLocalFSRepo"
-          $mptLocalFSRepo = Get-PSRepository | Where-Object name -eq $repoName
-          if (-not $mptLocalFSRepo) {
+          $repoPath = "${{ parameters.RepoPath }}"
+          $repoName = "${{ parameters.RepoName }}"
+          $FSRepo = Get-PSRepository | Where-Object name -eq $repoName
+          if (-not $FSRepo) {
             Write-Host "Repo not found, creating"
             Register-PSRepository -Name $repoName -SourceLocation $repoPath -PublishLocation $repoPath -ScriptSourceLocation $repoPath -ScriptPublishLocation $repoPath -InstallationPolicy Trusted
-          } elseif ($mptLocalFSRepo.SourceLocation -ne $repoPath) {
+          } elseif ($FSRepo.SourceLocation -ne $repoPath) {
             Write-Host "Repo found but wrong location, deleting and recreating"
             Unregister-PSRepository -Name $repoName
             Register-PSRepository -Name $repoName -SourceLocation $repoPath -PublishLocation $repoPath -ScriptSourceLocation $repoPath -ScriptPublishLocation $repoPath -InstallationPolicy Trusted
@@ -32,7 +36,7 @@ stages:
         displayName: Register Repository
       - powershell: |
           $version = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').Version.ToString()
-          Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -Repository 'MPTLocalFSRepo' -Force
+          Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -Repository '${{ parameters.RepoName }}' -Force
           Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
           Write-Host "##vso[task.setvariable variable=PackageVersion;isOutput=true]$version"
         displayName: Publish Module
@@ -49,8 +53,8 @@ stages:
           preDeploy:
             steps:
               - powershell: |
-                  $repopath = '\\files.umn.edu\OIT\Lines\MPT\PowershellRepository'
-                  $reponame = 'MPTLocalFSRepo'
+                  $repopath = '${{ parameters.RepoPath }}'
+                  $reponame = '${{ parameters.RepoName }}'
                   $Splat = @{
                     Name       = 'PSRepository'
                     ModuleName = @{
@@ -75,7 +79,7 @@ stages:
               - download: none
               - powershell: |
                   Get-PSRepository
-                  find-module -Repository MPTLocalFSRepo
+                  find-module -Repository '${{ parameters.RepoName }}'
                   $LatestVersion = '$(PackageVersion)'
                   $Splat = @{
                       Name       = 'PSModule'
