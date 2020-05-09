@@ -24,7 +24,7 @@ stages:
           artifactName: ${{ parameters.ModuleName }}
           targetPath: $(Build.ArtifactStagingDirectory)
       - powershell: |
-          @"
+          @'
           function Measure-UnicodeSubstitutions {
               <#
           .SYNOPSIS
@@ -106,7 +106,7 @@ stages:
                   #endregion
               }
           }
-          "@ | Set-Content "$(Build.SourcesDirectory)\Tests\CustomRules.psm1"
+          '@ | Set-Content "$(Build.SourcesDirectory)\Tests\CustomRules.psm1"
           gci "$(Build.SourcesDirectory)\Tests"
           Set-Content "$(Build.SourcesDirectory)\Tests\PSScriptAnalzyer.Tests.ps1" '$Path = "$(Build.ArtifactStagingDirectory)"
 
@@ -181,7 +181,7 @@ stages:
         inputs:
           summaryFileLocation: '$(Common.TestResultsDirectory)/Coverage-$(Build.SourceVersion).xml'
           pathToSources: $(Build.ArtifactStagingDirectory)
-          #failIfCoverageEmpty: true
+          failIfCoverageEmpty: true
         condition: succeededOrFailed()
       - task: PublishTestResults@2
         displayName: Publish Test Results
