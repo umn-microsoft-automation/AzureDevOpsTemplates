@@ -107,6 +107,7 @@ stages:
               }
           }
           "@ | Set-Content "$(Build.SourcesDirectory)\Tests\CustomRules.psm1"
+          gci "$(Build.SourcesDirectory)\Tests"
           Set-Content "$(Build.SourcesDirectory)\Tests\PSScriptAnalzyer.Tests.ps1" '$Path = "$(Build.ArtifactStagingDirectory)"
 
           Import-Module "$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}"
@@ -179,7 +180,7 @@ stages:
         displayName: Publish Code Coverage
         inputs:
           summaryFileLocation: '$(Common.TestResultsDirectory)/Coverage-$(Build.SourceVersion).xml'
-          pathToSources: $(CodeCoverageRecurseDirectories)
+          pathToSources: $(Build.ArtifactStagingDirectory)
           #failIfCoverageEmpty: true
         condition: succeededOrFailed()
       - task: PublishTestResults@2
