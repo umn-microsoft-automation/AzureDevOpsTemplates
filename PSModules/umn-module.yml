@@ -7,11 +7,18 @@ parameters:
   type: string
 - name: RepoName
   type: string
+- name: FailOnTestFailure
+  type: boolean
+  default: true
 
 stages:
 - template: build-module.yml
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
+- template: test-module.yml
+  parameters:
+    ModuleName: ${{ parameters.ModuleName }}
+    FailOnTestFailure: ${{ parameters.FailOnTestFailure }}
 - template: deploy-module.yml
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
