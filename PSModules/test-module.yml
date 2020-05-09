@@ -31,6 +31,9 @@ stages:
         parameters:
           ModuleName: ${{ parameters.ModuleName }}
       - powershell: |
+          gci "$(Build.SourcesDirectory)\Tests"
+          get-content "$(Build.SourcesDirectory)\Tests\Help.Tests.ps1"
+      - powershell: |
           Import-Module Pester
 
           $Options = @{
