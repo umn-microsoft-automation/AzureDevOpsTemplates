@@ -8,7 +8,7 @@ parameters:
 
 stages:
 - stage: Deploy
-  dependsOn: Build
+  dependsOn: Test
   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
   jobs:
     - job: Publish

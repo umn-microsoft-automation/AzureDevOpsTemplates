@@ -4,10 +4,21 @@ parameters:
 
 stages:
 - stage: Test
+  dependsOn: Build
   jobs:
     - job: Test
       steps:
-      - checkout: none
+        # https://github.com/PoshCode/Azure-Pipelines/blob/master/Install-RequiredModule-step.yml
+        - powershell: |
+            # Apparently, Install-Script isn't good enough except on Windows?
+            # Install-Script Install-RequiredModule -Force -Verbose
+            Save-Script Install-RequiredModule -Path '$(Pipeline.Workspace)'
+            &"$(Pipeline.Workspace)/Install-RequiredModule" -Path '$(Build.SourcesDirectory)/RequiredModules.psd1' -Confirm:$false -Verbose
+            foreach ($installErr in $IRM_InstallErrors) {
+                Write-Warning "ERROR: $installErr"
+                Write-Warning "STACKTRACE: $($installErr.ScriptStackTrace)"
+            }
+          displayName: 'Restore pre-requisites'
       - task: DownloadPipelineArtifact@2
         inputs:
           artifactName: ${{ parameters.ModuleName }}
@@ -95,8 +106,8 @@ stages:
                   #endregion
               }
           }
-          "@ | Set-Content .\Tests\CustomRules.psm1
-          Set-Content ".\Tests\PSScriptAnalzyer.Tests.ps1" '$Path = "$(Build.ArtifactStagingDirectory)"
+          "@ | Set-Content "$(Build.SourcesDirectory)\Tests\CustomRules.psm1"
+          Set-Content "$(Build.SourcesDirectory)\Tests\PSScriptAnalzyer.Tests.ps1" '$Path = "$(Build.ArtifactStagingDirectory)"
 
           Import-Module "$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}"
 
@@ -107,11 +118,11 @@ stages:
             }
 
             It "Can have custom rules" {
-              ".\Tests\CustomRules.psm1" | Should Exist
-              if ($CustomRules = Get-ScriptAnalyzerRule -CustomRulePath ".\Tests\CustomRules.psm1" -RecurseCustomRulePath) {
+              "$(Build.SourcesDirectory)\Tests\CustomRules.psm1" | Should Exist
+              if ($CustomRules = Get-ScriptAnalyzerRule -CustomRulePath "$(Build.SourcesDirectory)\Tests\CustomRules.psm1" -RecurseCustomRulePath) {
               $ScriptAnalyzer.Rules += $CustomRules
               $ScriptAnalyzer.Config += @{
-                  CustomRulePath        = ".\Tests\CustomRules.psm1"
+                  CustomRulePath        = "$(Build.SourcesDirectory)\Tests\CustomRules.psm1"
                   RecurseCustomRulePath = $true
               }
               }
@@ -147,7 +158,7 @@ stages:
           Import-Module Pester
 
           $Options = @{
-              Path = Convert-Path ".\Tests"
+              Path = Convert-Path "$(Build.SourcesDirectory)\Tests"
               OutputFormat = "NUnitXml"
               OutputFile = Join-Path '$(Common.TestResultsDirectory)' 'Test-$(Build.SourceVersion).xml'
           }
