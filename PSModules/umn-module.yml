@@ -12,6 +12,9 @@ stages:
 - template: build-module.yml
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
+- template: test-module.yml
+  parameters:
+    ModuleName: ${{ parameters.ModuleName }}
 - template: deploy-module.yml
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
