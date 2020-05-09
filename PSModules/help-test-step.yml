@@ -1,9 +1,13 @@
+parameters:
+- name: ModuleName
+  type: string
+
 steps:
 - powershell: |
     @'
-    Describe "Help tests for UMN-InsightVM" -Tags 'Build' {
+    Describe "Help tests for ${{ parameters.ModuleName }}" -Tags 'Build' {
 
-        $functions = Get-Command -Module UMN-InsightVM -CommandType Function
+        $functions = Get-Command -Module ${{ parameters.ModuleName }} -CommandType Function
         foreach($Function in $Functions){
             $help = Get-Help $Function.name
             Context $help.name {

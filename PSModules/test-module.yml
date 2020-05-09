@@ -1,6 +1,8 @@
 parameters:
 - name: ModuleName
   type: string
+- name: FailOnTestFailure
+  type: boolean
 
 stages:
 - stage: Test
@@ -26,6 +28,8 @@ stages:
       - template: custom-pssa-rules-step.yml
       - template: pssa-test-step.yml
       - template: help-test-step.yml
+        parameters:
+          ModuleName: ${{ parameters.ModuleName }}
       - powershell: |
           Import-Module Pester
 
@@ -62,6 +66,6 @@ stages:
           testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
           buildPlatform: $(PSPlatform)
           #buildConfiguration: ${{ parameters.configurationName }}
-          failTaskOnFailedTests: true
+          failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
           testRunTitle: "Pester on $(PSPlatform)"
         condition: succeededOrFailed()
