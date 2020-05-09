@@ -8,7 +8,6 @@ steps:
     Describe "Help tests for ${{ parameters.ModuleName }}" -Tags 'Build' {
 
       $functions = Get-Command -Module ${{ parameters.ModuleName }} -CommandType Function
-      Write-Warning ($functions -join ',')
       foreach($Function in $Functions){
         $help = Get-Help $Function.name
         Context $help.name {
