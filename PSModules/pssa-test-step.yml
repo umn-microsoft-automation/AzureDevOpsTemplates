@@ -3,8 +3,6 @@ steps:
     @'
     $Path = "$(Build.ArtifactStagingDirectory)"
 
-    Import-Module "$(Build.ArtifactStagingDirectory)\*"
-
     Describe "PSScriptAnalyzer" {
       $ScriptAnalyzer = @{
         Config = @{ Path = $Path; Recurse = $true; IncludeDefaultRules = $true }
