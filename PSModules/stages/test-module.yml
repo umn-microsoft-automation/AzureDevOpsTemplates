@@ -25,9 +25,9 @@ stages:
         inputs:
           artifactName: ${{ parameters.ModuleName }}
           targetPath: $(Build.ArtifactStagingDirectory)
-      - template: custom-pssa-rules-step.yml
-      - template: pssa-test-step.yml
-      - template: help-test-step.yml
+      - template: ../steps/test/custom-pssa-rules-step.yml
+      - template: ../steps/test/pssa-test-step.yml
+      - template: ../steps/test/help-test-step.yml
         parameters:
           ModuleName: ${{ parameters.ModuleName }}
       - powershell: |

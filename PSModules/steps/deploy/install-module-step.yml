@@ -1,0 +1,10 @@
+﻿parameters:
+- name: ModuleName
+  type: string
+- name: RepoName
+  type: string
+
+steps:
+  - powershell: |
+      write-host "whatever"
+    displayName: whatever

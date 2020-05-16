@@ -21,19 +21,10 @@ stages:
         inputs:
           artifactName: ${{ parameters.ModuleName }}
           targetPath: $(Build.ArtifactStagingDirectory)
-      - powershell: |
-          $repoPath = "${{ parameters.RepoPath }}"
-          $repoName = "${{ parameters.RepoName }}"
-          $FSRepo = Get-PSRepository | Where-Object name -eq $repoName
-          if (-not $FSRepo) {
-            Write-Host "Repo not found, creating"
-            Register-PSRepository -Name $repoName -SourceLocation $repoPath -PublishLocation $repoPath -ScriptSourceLocation $repoPath -ScriptPublishLocation $repoPath -InstallationPolicy Trusted
-          } elseif ($FSRepo.SourceLocation -ne $repoPath) {
-            Write-Host "Repo found but wrong location, deleting and recreating"
-            Unregister-PSRepository -Name $repoName
-            Register-PSRepository -Name $repoName -SourceLocation $repoPath -PublishLocation $repoPath -ScriptSourceLocation $repoPath -ScriptPublishLocation $repoPath -InstallationPolicy Trusted
-          }
-        displayName: Register Repository
+      - template: ../steps/deploy/register-psrepository-step.yml
+        parameters:
+          RepoPath: ${{ parameters.RepoPath }}
+          RepoName: ${{ parameters.RepoName }}
       - powershell: |
           $version = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').Version.ToString()
           Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -Repository '${{ parameters.RepoName }}' -Force
@@ -53,28 +44,10 @@ stages:
           deploy:
             steps:
               - download: none
-              - powershell: |
-                  $repopath = '${{ parameters.RepoPath }}'
-                  $reponame = '${{ parameters.RepoName }}'
-                  $Splat = @{
-                    Name       = 'PSRepository'
-                    ModuleName = @{
-                      ModuleName    = 'PowershellGet'
-                      ModuleVersion = '2.2.4'
-                    }
-                    Property   = @{
-                      Name                  = $reponame
-                      SourceLocation        = $repopath
-                      PublishLocation       = $repopath
-                      ScriptSourceLocation  = $repopath
-                      ScriptPublishLocation = $repopath
-                      InstallationPolicy    = 'Trusted'
-                    }
-                    Method     = 'Set'
-                  }
-                  Invoke-DscResource @Splat -Verbose -ErrorAction Stop
-                  Get-PSRepository
-                displayName: Register Repository
+              - template: ../steps/deploy/register-psrepository-step.yml
+                parameters:
+                  RepoPath: ${{ parameters.RepoPath }}
+                  RepoName: ${{ parameters.RepoName }}
               - powershell: |
                   Get-PSRepository
                   find-module -Repository '${{ parameters.RepoName }}'
