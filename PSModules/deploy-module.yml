@@ -35,6 +35,15 @@ stages:
           }
         displayName: Register Repository
       - powershell: |
+          Write-Host "$(Agent.TempDirectory)"
+          gci "$(Agent.TempDirectory)"
+          $module = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1')
+          foreach ($req in $module.RequiredModules) {
+            Save-Module -Name $req -Path $(Agent.TempDirectory)
+          }
+        displayName: Download Module Dependencies
+      - powershell: |
+          $env:PSModulePath = $env:PSModulePath + [System.IO.Path]::PathSeparator + "$(Agent.TempDirectory)"
           $version = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').ModuleVersion
           Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -Repository '${{ parameters.RepoName }}' -Force
           Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
