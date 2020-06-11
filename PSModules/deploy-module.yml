@@ -35,7 +35,7 @@ stages:
           }
         displayName: Register Repository
       - powershell: |
-          $version = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').Version.ToString()
+          $version = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').ModuleVersion
           Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -Repository '${{ parameters.RepoName }}' -Force
           Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
           Write-Host "##vso[task.setvariable variable=PackageVersion;isOutput=true]$version"
