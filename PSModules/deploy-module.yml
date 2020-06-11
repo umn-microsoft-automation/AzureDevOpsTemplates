@@ -44,6 +44,7 @@ stages:
         displayName: Download Module Dependencies
       - powershell: |
           $env:PSModulePath = $env:PSModulePath + [System.IO.Path]::PathSeparator + "$(Agent.TempDirectory)"
+          gci "$(Agent.TempDirectory)"
           $version = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').ModuleVersion
           Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -Repository '${{ parameters.RepoName }}' -Force
           Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
