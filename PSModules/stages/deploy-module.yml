@@ -59,7 +59,7 @@ stages:
 
           $uri = $uribase + "repos/bajurny/modulebuildtests/releases"
           $body = @{tag_name="v1.2.7"} |ConvertTo-Json
-          $releases = Invoke-RestMethod -Uri $uri -Headers $ghHeader
+          ($releases = Invoke-RestMethod -Uri $uri -Headers $ghHeader)
         displayName: Publish Release
         env:
           PAT: ${{ parameters.GitHubPAT }}
