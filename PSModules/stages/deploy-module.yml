@@ -5,6 +5,8 @@ parameters:
   type: string
 - name: RepoName
   type: string
+- name: GitHubPAT
+  type: string
 
 stages:
 - stage: Deploy
@@ -50,7 +52,7 @@ stages:
         name: PublishModule
       - powershell: |
           gci env:
-          $auth = $(github.umn.edu_repomodify)
+          $auth = "${{ parameters.GitHubPAT }}"
           $ghHeader = @{ Authorization = "Basic "+ [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($auth)) }
 
           $uribase = "https://github.umn.edu/api/v3/"

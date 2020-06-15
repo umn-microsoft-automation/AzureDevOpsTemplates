@@ -10,6 +10,8 @@ parameters:
 - name: FailOnTestFailure
   type: boolean
   default: true
+- name: GitHubPAT
+  type: string
 
 stages:
 - template: stages/build-module.yml
@@ -24,3 +26,4 @@ stages:
     ModuleName: ${{ parameters.ModuleName }}
     RepoPath: ${{ parameters.RepoPath }}
     RepoName: ${{ parameters.RepoName }}
+    GitHubPAT: ${{ parameters.GitHubPAT}}
