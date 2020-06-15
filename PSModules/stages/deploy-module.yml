@@ -36,7 +36,7 @@ stages:
       - powershell: |
           $env:PSModulePath = $env:PSModulePath + [System.IO.Path]::PathSeparator + "$(Agent.TempDirectory)"
           gci "$(Agent.TempDirectory)"
-          $test = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').Version.ToString()
+          $test = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1')
           if ($test.PrivateData.PSData.Prerelease) {
             $version = "$($test.version)-$($test.PrivateData.PSData.Prerelease)"
           } else {
