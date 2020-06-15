@@ -52,7 +52,7 @@ stages:
         name: PublishModule
       - powershell: |
           gci env:
-          $auth = "${{ parameters.GitHubPAT }}"
+          $auth = "$(PAT)"
           $ghHeader = @{ Authorization = "Basic "+ [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($auth)) }
 
           $uribase = "https://github.umn.edu/api/v3/"
@@ -61,6 +61,8 @@ stages:
           $body = @{tag_name="v1.2.7"} |ConvertTo-Json
           $releases = Invoke-RestMethod -Uri $uri -Headers $ghHeader
         displayName: Publish Release
+        env:
+          PAT: ${{ parameters.GitHubPAT }}
     - deployment: Production
       condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
       dependsOn: Publish

@@ -26,4 +26,4 @@ stages:
     ModuleName: ${{ parameters.ModuleName }}
     RepoPath: ${{ parameters.RepoPath }}
     RepoName: ${{ parameters.RepoName }}
-    GitHubPAT: ${{ parameters.GitHubPAT}}
+    GitHubPAT: ${{ parameters.GitHubPAT }}
