@@ -6,7 +6,7 @@
 
 steps:
   - download: none
-  - template: ../steps/deploy/register-psrepository-step.yml
+  - template: register-psrepository-step.yml
     parameters:
       RepoPath: ${{ parameters.RepoPath }}
       RepoName: ${{ parameters.RepoName }}
