@@ -1,0 +1,30 @@
+﻿parameters:
+  - name: RepoPath
+    type: string
+  - name: RepoName
+    type: string
+
+steps:
+  - download: none
+  - template: ../steps/deploy/register-psrepository-step.yml
+    parameters:
+      RepoPath: ${{ parameters.RepoPath }}
+      RepoName: ${{ parameters.RepoName }}
+  - powershell: |
+      Get-PSRepository
+      find-module -Repository '${{ parameters.RepoName }}'
+      $LatestVersion = '$(PackageVersion)'
+      $Splat = @{
+          Name       = 'PSModule'
+          ModuleName = @{
+              ModuleName = 'PowershellGet'
+              ModuleVersion = '2.2.4'
+          }
+          Property   = @{
+              Name           = '${{ parameters.ModuleName }}'
+              MinimumVersion = $LatestVersion
+              Ensure         = 'Present'
+          }
+          Method = 'Set'
+      }
+      Invoke-DscResource @Splat -Verbose -ErrorAction Stop

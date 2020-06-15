@@ -52,47 +52,35 @@ stages:
         name: PublishModule
       - powershell: |
           gci env:
-          $auth = "${{ parameters.GitHubPAT }}"
+          $auth = '${{ parameters.GitHubPAT }}'
           $ghHeader = @{ Authorization = "Basic "+ [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($auth)) }
 
           $uribase = "https://github.umn.edu/api/v3/"
 
           $uri = $uribase + "repos/bajurny/modulebuildtests/releases"
-          $body = @{tag_name="v1.2.7"} |ConvertTo-Json
+          $body = @{
+            tag_name=$env:PUBLISHMODULE_PACKAGEVERSION
+            target_commitish= "$(Build.SourceVersion)"
+            } |ConvertTo-Json
+          write-host $body
           ($releases = Invoke-RestMethod -Uri $uri -Headers $ghHeader)
         displayName: Publish Release
     - deployment: Production
-      condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+      #condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
       dependsOn: Publish
       variables:
         PackageVersion: $[ dependencies.Publish.outputs['PublishModule.PackageVersion']]
       environment:
         name: Production
         resourceType: VirtualMachine
+        tags:
+          - tst
+          - unit:iat
       strategy:
         rolling:
           deploy:
             steps:
-              - download: none
-              - template: ../steps/deploy/register-psrepository-step.yml
+              - template: ../steps/deploy/deployment-job-steps.yml
                 parameters:
                   RepoPath: ${{ parameters.RepoPath }}
                   RepoName: ${{ parameters.RepoName }}
-              - powershell: |
-                  Get-PSRepository
-                  find-module -Repository '${{ parameters.RepoName }}'
-                  $LatestVersion = '$(PackageVersion)'
-                  $Splat = @{
-                      Name       = 'PSModule'
-                      ModuleName = @{
-                          ModuleName = 'PowershellGet'
-                          ModuleVersion = '2.2.4'
-                      }
-                      Property   = @{
-                          Name           = '${{ parameters.ModuleName }}'
-                          MinimumVersion = $LatestVersion
-                          Ensure         = 'Present'
-                      }
-                      Method = 'Set'
-                  }
-                  Invoke-DscResource @Splat -Verbose -ErrorAction Stop
