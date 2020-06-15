@@ -9,7 +9,7 @@ parameters:
 stages:
 - stage: Deploy
   dependsOn: Test
-  condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+  #condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
   jobs:
     - job: Publish
       pool: Default
@@ -36,13 +36,31 @@ stages:
       - powershell: |
           $env:PSModulePath = $env:PSModulePath + [System.IO.Path]::PathSeparator + "$(Agent.TempDirectory)"
           gci "$(Agent.TempDirectory)"
-          $version = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').ModuleVersion
+          $test = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').Version.ToString()
+          if ($test.PrivateData.PSData.Prerelease) {
+            $version = "$($test.version)-$($test.PrivateData.PSData.Prerelease)"
+          } else {
+            $version = $test.Version.ToString()
+          }
+          #$version = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').ModuleVersion
           Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -Repository '${{ parameters.RepoName }}' -Force
           Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
           Write-Host "##vso[task.setvariable variable=PackageVersion;isOutput=true]$version"
         displayName: Publish Module
         name: PublishModule
+      - powershell: |
+          gci env:
+          $auth = $(github.umn.edu_repomodify)
+          $ghHeader = @{ Authorization = "Basic "+ [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($auth)) }
+
+          $uribase = "https://github.umn.edu/api/v3/"
+
+          $uri = $uribase + "repos/bajurny/modulebuildtests/releases"
+          $body = @{tag_name="v1.2.7"} |ConvertTo-Json
+          $releases = Invoke-RestMethod -Uri $uri -Headers $ghHeader
+        displayName: Publish Release
     - deployment: Production
+      condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
       dependsOn: Publish
       variables:
         PackageVersion: $[ dependencies.Publish.outputs['PublishModule.PackageVersion']]
