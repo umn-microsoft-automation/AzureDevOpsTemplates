@@ -23,6 +23,8 @@ stages:
             versionSpec: '5.x'
         - task: gitversion/execute@0
         - powershell: |
+            gci env:
+        - powershell: |
             Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -SemVer $(GitVersion.NuGetVersion) -Verbose
           displayName: 'Build Module'
         - publish: $(Build.ArtifactStagingDirectory)
