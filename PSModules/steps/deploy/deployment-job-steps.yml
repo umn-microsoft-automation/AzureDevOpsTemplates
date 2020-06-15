@@ -12,21 +12,7 @@ steps:
     parameters:
       RepoPath: ${{ parameters.RepoPath }}
       RepoName: ${{ parameters.RepoName }}
-  - powershell: |
-      Get-PSRepository
-      find-module -Repository '${{ parameters.RepoName }}'
-      $LatestVersion = '$(PackageVersion)'
-      $Splat = @{
-          Name       = 'PSModule'
-          ModuleName = @{
-              ModuleName = 'PowershellGet'
-              ModuleVersion = '2.2.4'
-          }
-          Property   = @{
-              Name           = '${{ parameters.ModuleName }}'
-              MinimumVersion = $LatestVersion
-              Ensure         = 'Present'
-          }
-          Method = 'Set'
-      }
-      Invoke-DscResource @Splat -Verbose -ErrorAction Stop
+  - template: install-module-step.yml
+    parameters:
+      ModuleName: ${{ parameters.ModuleName }}
+      RepoName: ${{ parameters.RepoName }}

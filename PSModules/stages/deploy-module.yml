@@ -65,7 +65,7 @@ stages:
           write-host $body
           ($releases = Invoke-RestMethod -Uri $uri -Headers $ghHeader)
         displayName: Publish Release
-    - deployment: Production
+    - deployment: Test
       #condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
       dependsOn: Publish
       variables:
@@ -73,9 +73,25 @@ stages:
       environment:
         name: Production
         resourceType: VirtualMachine
-        tags: 'unit:iat'
-#        - tst
-#        - unit:iat
+        tags: tst
+      strategy:
+        rolling:
+          deploy:
+            steps:
+              - template: ../steps/deploy/deployment-job-steps.yml
+                parameters:
+                  RepoPath: ${{ parameters.RepoPath }}
+                  RepoName: ${{ parameters.RepoName }}
+                  ModuleName: ${{ parameters.ModuleName }}
+    - deployment: Production
+      condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+      dependsOn: Publish
+      variables:
+        PackageVersion: $[ dependencies.Publish.outputs['PublishModule.PackageVersion']]
+      environment:
+        name: Production
+        resourceType: VirtualMachine
+        tags: prd
       strategy:
         rolling:
           deploy:
