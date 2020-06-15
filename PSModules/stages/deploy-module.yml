@@ -73,9 +73,9 @@ stages:
       environment:
         name: Production
         resourceType: VirtualMachine
-        tags:
-        - tst
-        - unit:iat
+        tags: [tst,unit:iat]
+#        - tst
+#        - unit:iat
       strategy:
         rolling:
           deploy:
