@@ -18,8 +18,13 @@ stages:
                 Write-Warning "STACKTRACE: $($installErr.ScriptStackTrace)"
             }
           displayName: 'Restore pre-requisites'
+        - task: gitversion/setup@0
+          inputs:
+            versionSpec: '5.x'
+        - task: gitversion/execute@0
+          inputs:
         - powershell: |
-            Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}'
+            Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -SemVer $(GitVersion.NuGetVersion) -Verbose
           displayName: 'Build Module'
         - publish: $(Build.ArtifactStagingDirectory)
           artifact: ${{ parameters.ModuleName }}
