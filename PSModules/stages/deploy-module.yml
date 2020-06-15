@@ -84,3 +84,4 @@ stages:
                 parameters:
                   RepoPath: ${{ parameters.RepoPath }}
                   RepoName: ${{ parameters.RepoName }}
+                  ModuleName: ${{ parameters.ModuleName }}

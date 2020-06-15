@@ -3,6 +3,8 @@
     type: string
   - name: RepoName
     type: string
+  - name: ModuleName
+    type: string
 
 steps:
   - download: none
