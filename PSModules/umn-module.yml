@@ -1,4 +1,6 @@
 # template
+variables:
+  - group: 'GitHub PATs'
 
 parameters:
 - name: ModuleName
@@ -12,6 +14,7 @@ parameters:
   default: true
 - name: GitHubPAT
   type: string
+  default: $[variables.github_umn_edu_hss_repomodify]
 
 stages:
 - template: stages/build-module.yml
