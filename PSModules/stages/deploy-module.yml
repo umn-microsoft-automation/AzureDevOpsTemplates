@@ -83,7 +83,7 @@ stages:
           $uploadurl = ($release.upload_url).Split('{')[0] + '?name=${{ parameters.ModuleName }}.zip'
           ($asset = Invoke-RestMethod -Uri $uploadurl -Method Post -InFile '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip' -Headers $ghHeader -ContentType 'application/zip')
         displayName: Publish Release
-        #condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+        condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
     - deployment: Test
       dependsOn: Publish
       variables:
