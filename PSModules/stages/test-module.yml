@@ -44,7 +44,7 @@ stages:
               OutputFile = Join-Path '$(Common.TestResultsDirectory)' 'Test-$(Build.SourceVersion).xml'
           }
 
-          if ($CodeCoverage = "$(Build.ArtifactStagingDirectory)") {
+          if ($CodeCoverage = "$(Build.ArtifactStagingDirectory)\*") {
               $Options.CodeCoverage = Get-ChildItem $CodeCoverage -Recurse -Include *.psm1, *.ps1 | Convert-Path
               $Options.CodeCoverageOutputFile = '$(Common.TestResultsDirectory)/Coverage-$(Build.SourceVersion).xml'
           }
@@ -55,13 +55,14 @@ stages:
           }
 
           Write-Host "##vso[task.setvariable variable=PSPlatform]PowerShell $($PSVersionTable['PSVersion', 'OS'] -join ' on ')"
+          Write-Host "##vso[task.setvariable variable=CodeCovDir]$(Resolve-Path $CodeCoverage)"
           Invoke-Pester @Options
         displayName: Run Pester Tests
       - task: PublishCodeCoverageResults@1
         displayName: Publish Code Coverage
         inputs:
           summaryFileLocation: '$(Common.TestResultsDirectory)/Coverage-$(Build.SourceVersion).xml'
-          pathToSources: $(Build.ArtifactStagingDirectory)
+          pathToSources: $(CodeCovDir)
           failIfCoverageEmpty: true
         condition: succeededOrFailed()
       - task: PublishTestResults@2
