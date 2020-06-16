@@ -25,7 +25,12 @@ stages:
         - powershell: |
             gci env:
         - powershell: |
-            Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -SemVer $(GitVersion.NuGetVersion) -Verbose
+            $version = '$(GitVersion.NuGetVersion)'
+            if ((($split = $version.split('-')).Count -1) -gt 1) {
+                $split.Count
+                $version = $split[0] + '-' + ($split[1..($split.Count -1)] -join 'b')
+            }
+            Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -SemVer $version -Verbose
           displayName: 'Build Module'
         - publish: $(Build.ArtifactStagingDirectory)
           artifact: ${{ parameters.ModuleName }}
