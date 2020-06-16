@@ -18,6 +18,11 @@ stages:
                 Write-Warning "STACKTRACE: $($installErr.ScriptStackTrace)"
             }
           displayName: 'Restore pre-requisites'
+        - powershell: |
+            if (-not (test-path '$(Build.SourcesDirectory)/GitVersion.yml')) {
+                "mode: Mainline" | Set-Content '$(Build.SourcesDirectory)/GitVersion.yml'
+            }
+          displayName: Create gitversion.yml if none exists
         - task: gitversion/setup@0
           inputs:
             versionSpec: '5.x'
