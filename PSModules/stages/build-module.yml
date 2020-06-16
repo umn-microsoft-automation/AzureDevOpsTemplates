@@ -25,12 +25,17 @@ stages:
         - powershell: |
             gci env:
         - powershell: |
-            $version = '$(GitVersion.NuGetVersion)'
-            if ((($split = $version.split('-')).Count -1) -gt 1) {
-                $split.Count
-                $version = $split[0] + '-' + ($split[1..($split.Count -1)] -join 'b')
+            # A valid Nuget version allows a hyphen in the prerelease string, and on a pull request build,
+            # the gitversion generated nuget version will have a hyphen in the prerelease string (example: "1.2.8-pullrequest0003-0016")
+            # However Publish-Module will not accept a hyphen (https://github.com/PowerShell/PowerShellGetv2/issues/561)
+            # This will "normalize" the prerelease string and replace any hyphens with a b (for build)
+            $semver = '$(GitVersion.NuGetVersion)'
+            $version, $prerelease = $semver -split '-', 2
+            if ($prerelease) {
+                $validPreRelease = $prerelease -replace '-', 'b'
+                $semver = $version + '-' + $validPreRelease
             }
-            Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -SemVer $version -VersionedOutputDirectory -Verbose
+            Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -SemVer $semver -VersionedOutputDirectory -Verbose
           displayName: 'Build Module'
         - publish: $(Build.ArtifactStagingDirectory)
           artifact: ${{ parameters.ModuleName }}

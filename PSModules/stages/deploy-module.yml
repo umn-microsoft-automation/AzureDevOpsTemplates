@@ -50,22 +50,40 @@ stages:
           Write-Host "##vso[task.setvariable variable=PackageVersion;isOutput=true]$version"
         displayName: Publish Module
         name: PublishModule
+      - task: ArchiveFiles@2
+        inputs:
+          rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}'
+          includeRootFolder: true
+          archiveType: zip
+          archiveFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip'
       - powershell: |
           gci env:
           $auth = '${{ parameters.GitHubPAT }}'
           $ghHeader = @{ Authorization = "Basic "+ [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($auth)) }
 
-          $uribase = "https://github.umn.edu/api/v3/"
+          $repositoryUri = $Env:BUILD_REPOSITORY_URI
 
-          $uri = $uribase + "repos/bajurny/modulebuildtests/releases"
+          $uribuilder = [System.UriBuilder]$repositoryUri
+          if ($uribuilder.Host -eq "github.com") {
+              $ghHost = "api.github.com"
+          } else {
+              $ghHost = $uribuilder.Host
+          }
+          $uribase = $uribuilder.Scheme + "://" + $ghHost + "/api/v3/"
+
+          $uri = $uribase + "repos" + $uribuilder.Path + "/releases"
+
           $body = @{
-            tag_name=$env:PUBLISHMODULE_PACKAGEVERSION
+            tag_name="v$env:PUBLISHMODULE_PACKAGEVERSION"
             target_commitish= "$(Build.SourceVersion)"
-            } |ConvertTo-Json
+            } | ConvertTo-Json
           write-host $body
-          Invoke-RestMethod -Uri $uri -Headers $ghHeader -Body $body -Method Post
+          ($release = Invoke-RestMethod -Uri $uri -Headers $ghHeader -Body $body -Method Post)
+
+          $uploadurl = ($release.upload_url).Split('{')[0] + '?name=${{ parameters.ModuleName }}.zip'
+          ($asset = Invoke-RestMethod -Uri $uploadurl -Method Post -InFile '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip' -Headers $ghHeader)
         displayName: Publish Release
-        condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+        #condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
     - deployment: Test
       dependsOn: Publish
       variables:
