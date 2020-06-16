@@ -31,11 +31,12 @@ stages:
         parameters:
           ModuleName: ${{ parameters.ModuleName }}
       - powershell: |
-          gci "$(Build.SourcesDirectory)\Tests"
-          get-content "$(Build.SourcesDirectory)\Tests\Help.Tests.ps1"
+          #gci "$(Build.SourcesDirectory)\Tests"
+          #get-content "$(Build.SourcesDirectory)\Tests\Help.Tests.ps1"
+          gci -recurse "$(Build.ArtifactStagingDirectory)"
       - powershell: |
           Import-Module Pester
-          Import-Module "$(Build.ArtifactStagingDirectory)\*\${{ parameters.ModuleName }}"
+          Import-Module "$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}"
 
           $Options = @{
               Path = Convert-Path "$(Build.SourcesDirectory)\Tests"
