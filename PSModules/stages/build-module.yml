@@ -30,7 +30,7 @@ stages:
                 $split.Count
                 $version = $split[0] + '-' + ($split[1..($split.Count -1)] -join 'b')
             }
-            Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -SemVer $version -Verbose
+            Build-Module -OutputDirectory '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -SemVer $version -VersionedOutputDirectory -Verbose
           displayName: 'Build Module'
         - publish: $(Build.ArtifactStagingDirectory)
           artifact: ${{ parameters.ModuleName }}

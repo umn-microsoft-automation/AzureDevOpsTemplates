@@ -30,7 +30,7 @@ stages:
       - powershell: |
           Write-Host "$(Agent.TempDirectory)"
           gci "$(Agent.TempDirectory)"
-          $module = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1')
+          $module = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
           foreach ($req in $module.RequiredModules) {
             Save-Module -Name $req -Path $(Agent.TempDirectory)
           }
@@ -38,14 +38,14 @@ stages:
       - powershell: |
           $env:PSModulePath = $env:PSModulePath + [System.IO.Path]::PathSeparator + "$(Agent.TempDirectory)"
           gci "$(Agent.TempDirectory)"
-          $test = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1')
+          $test = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
           if ($test.PrivateData.PSData.Prerelease) {
             $version = "$($test.version)-$($test.PrivateData.PSData.Prerelease)"
           } else {
             $version = $test.Version.ToString()
           }
-          #$version = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\${{ parameters.ModuleName }}.psd1').ModuleVersion
-          Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}' -Repository '${{ parameters.RepoName }}' -Force
+          #$version = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1').ModuleVersion
+          Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*' -Repository '${{ parameters.RepoName }}' -Force
           Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
           Write-Host "##vso[task.setvariable variable=PackageVersion;isOutput=true]$version"
         displayName: Publish Module

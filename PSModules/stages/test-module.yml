@@ -35,7 +35,7 @@ stages:
           get-content "$(Build.SourcesDirectory)\Tests\Help.Tests.ps1"
       - powershell: |
           Import-Module Pester
-          Import-Module "$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}"
+          Import-Module "$(Build.ArtifactStagingDirectory)\*\${{ parameters.ModuleName }}"
 
           $Options = @{
               Path = Convert-Path "$(Build.SourcesDirectory)\Tests"
