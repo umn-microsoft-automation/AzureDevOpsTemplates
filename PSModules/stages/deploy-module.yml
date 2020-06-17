@@ -56,6 +56,7 @@ stages:
           includeRootFolder: true
           archiveType: zip
           archiveFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip'
+        condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
       - powershell: |
           gci env:
           $auth = '${{ parameters.GitHubPAT }}'
@@ -76,6 +77,7 @@ stages:
           $body = @{
             tag_name="v$env:PUBLISHMODULE_PACKAGEVERSION"
             target_commitish= "$(Build.SourceVersion)"
+            name = "${{ parameters.ModuleName }} v$env:PUBLISHMODULE_PACKAGEVERSION"
             } | ConvertTo-Json
           write-host $body
           ($release = Invoke-RestMethod -Uri $uri -Headers $ghHeader -Body $body -Method Post)
