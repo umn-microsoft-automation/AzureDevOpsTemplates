@@ -1,0 +1,18 @@
+﻿parameters:
+  - name: RepoPath
+    type: string
+  - name: RepoName
+    type: string
+  - name: ModuleName
+    type: string
+
+steps:
+  - download: none
+  - template: register-psrepository-step.yml
+    parameters:
+      RepoPath: ${{ parameters.RepoPath }}
+      RepoName: ${{ parameters.RepoName }}
+  - template: install-module-step.yml
+    parameters:
+      ModuleName: ${{ parameters.ModuleName }}
+      RepoName: ${{ parameters.RepoName }}

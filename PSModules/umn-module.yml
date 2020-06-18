@@ -1,5 +1,4 @@
 # template
-
 parameters:
 - name: ModuleName
   type: string
@@ -10,17 +9,21 @@ parameters:
 - name: FailOnTestFailure
   type: boolean
   default: true
+- name: GitHubPAT
+  type: string
+  default: "this will fail"
 
 stages:
-- template: build-module.yml
+- template: stages/build-module.yml
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
-- template: test-module.yml
+- template: stages/test-module.yml
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
     FailOnTestFailure: ${{ parameters.FailOnTestFailure }}
-- template: deploy-module.yml
+- template: stages/deploy-module.yml
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
     RepoPath: ${{ parameters.RepoPath }}
     RepoName: ${{ parameters.RepoName }}
+    GitHubPAT: ${{ parameters.GitHubPAT }}
