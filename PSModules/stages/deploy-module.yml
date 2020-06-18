@@ -91,9 +91,8 @@ stages:
       variables:
         PackageVersion: $[ dependencies.Publish.outputs['PublishModule.PackageVersion']]
       environment:
-        name: Production
+        name: Test
         resourceType: VirtualMachine
-        tags: tst
       strategy:
         rolling:
           deploy:
@@ -111,7 +110,6 @@ stages:
       environment:
         name: Production
         resourceType: VirtualMachine
-        tags: prd
       strategy:
         rolling:
           deploy:
