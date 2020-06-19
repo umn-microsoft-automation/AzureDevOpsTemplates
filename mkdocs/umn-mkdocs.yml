@@ -9,6 +9,7 @@ jobs:
   - script: |
       sudo npm i -g markdownlint-cli
       markdownlint "**/*.md"
+    continueOnError: true
   - script: |
       docker pull squidfunk/mkdocs-material
       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
