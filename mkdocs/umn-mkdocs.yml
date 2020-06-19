@@ -7,7 +7,7 @@ jobs:
 - job: build
   steps:
   - script: |
-      npm i -g markdownlint-cli --loglevel verbose
+      sudo npm i -g markdownlint-cli
       markdownlint "**/*.md"
   - script: |
       docker pull squidfunk/mkdocs-material
