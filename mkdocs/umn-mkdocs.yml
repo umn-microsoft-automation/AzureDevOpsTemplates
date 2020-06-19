@@ -7,6 +7,9 @@ jobs:
 - job: build
   steps:
   - script: |
+      npm i -g markdownlint-cli
+      markdownlint "**/*.md"
+  - script: |
       docker pull squidfunk/mkdocs-material
       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
