@@ -3,8 +3,6 @@ parameters:
 - name: DocsPath
   type: string
 
-pool:
-  vmImage: 'ubuntu-latest'
 jobs:
 - job: build
   steps:
