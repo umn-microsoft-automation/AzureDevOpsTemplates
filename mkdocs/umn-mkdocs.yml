@@ -15,14 +15,14 @@ jobs:
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     Environment: Dev
-    BuildCondition: ${{ and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/heads/dev')) }}
+    BuildCondition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/heads/dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     Environment: Tst
-    BuildCondition: ${{ and(succeeded(), not(startsWith(variables['build.sourceBranch'], 'refs/heads/dev'))) }}
+    BuildCondition: and(succeeded(), not(startsWith(variables['build.sourceBranch'], 'refs/heads/dev')))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     Environment: Prd
-    BuildCondition: ${{ and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master')) }}
+    BuildCondition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
