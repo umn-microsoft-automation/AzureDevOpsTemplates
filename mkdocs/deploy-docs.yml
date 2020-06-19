@@ -6,6 +6,7 @@ parameters:
 - name: BuildCondition
   type: boolean
 
+jobs:
 - deployment: ${{ parameters.Environment }}
   condition: ${{ parameters.BuildCondition }}
   dependsOn: build
