@@ -6,13 +6,14 @@ parameters:
 jobs:
 - job: build
   steps:
+
+  - script: |
+      docker pull squidfunk/mkdocs-material
+      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
   - script: |
       sudo npm i -g markdownlint-cli
       markdownlint "**/*.md" -o $(Build.ArtifactStagingDirectory)/mdl.txt
     continueOnError: true
-  - script: |
-      docker pull squidfunk/mkdocs-material
-      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ parameters.DocsPath }}
 - template: deploy-docs.yml
