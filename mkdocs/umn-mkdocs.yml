@@ -8,7 +8,7 @@ jobs:
   steps:
   - script: |
       sudo npm i -g markdownlint-cli
-      markdownlint "**/*.md"
+      markdownlint "**/*.md" -o $(Build.ArtifactStagingDirectory)/mdl.txt
     continueOnError: true
   - script: |
       docker pull squidfunk/mkdocs-material
