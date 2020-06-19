@@ -1,0 +1,30 @@
+# template
+parameters:
+- name: DocsPath
+  type: string
+
+pool:
+  vmImage: 'ubuntu-latest'
+jobs:
+- job: build
+  steps:
+  - script: |
+      docker pull squidfunk/mkdocs-material
+      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
+  - publish: $(Build.ArtifactStagingDirectory)
+    artifact: ${{ parameters.DocsPath }}
+- template: deploy-docs.yml
+  parameters:
+    DocsPath: ${{ parameters.DocsPath }}
+    Environment: Dev
+    BuildCondition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/heads/dev'))
+- template: deploy-docs.yml
+  parameters:
+    DocsPath: ${{ parameters.DocsPath }}
+    Environment: Tst
+    BuildCondition: and(succeeded(), not(startsWith(variables['build.sourceBranch'], 'refs/heads/dev')))
+- template: deploy-docs.yml
+  parameters:
+    DocsPath: ${{ parameters.DocsPath }}
+    Environment: Prd
+    BuildCondition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
