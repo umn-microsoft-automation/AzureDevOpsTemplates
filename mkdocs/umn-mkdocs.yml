@@ -7,7 +7,7 @@ parameters:
   default: true
 - name: ArtifactName
   type: string
-  default: ${{ parameters.DocsPath }}
+  default: $(DocsPath)
 
 jobs:
 - job: build
