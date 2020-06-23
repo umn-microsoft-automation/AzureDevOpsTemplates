@@ -7,6 +7,7 @@ parameters:
   default: true
 - name: ArtifactName
   type: string
+  default: ''
 
 jobs:
 - job: build
