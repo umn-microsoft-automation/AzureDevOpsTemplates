@@ -2,6 +2,12 @@
 parameters:
 - name: DocsPath
   type: string
+- name: CleanDestination
+  type: boolean
+  default: true
+- name: ArtifactName
+  type: string
+  default: ${{ parameters.DocsPath }}
 
 jobs:
 - job: build
@@ -15,19 +21,25 @@ jobs:
       markdownlint "**/*.md" -o $(Build.ArtifactStagingDirectory)/mdl.txt
     continueOnError: true
   - publish: $(Build.ArtifactStagingDirectory)
-    artifact: ${{ parameters.DocsPath }}
+    artifact: ${{ parameters.ArtifactName }}
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
+    CleanDestination: ${{ parameters.CleanDestination }}
+    ArtifactName: ${{ parameters.ArtifactName }}
     Environment: Dev
     BuildCondition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/heads/dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
+    CleanDestination: ${{ parameters.CleanDestination }}
+    ArtifactName: ${{ parameters.ArtifactName }}
     Environment: Tst
     BuildCondition: and(succeeded(), not(startsWith(variables['build.sourceBranch'], 'refs/heads/dev')))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
+    CleanDestination: ${{ parameters.CleanDestination }}
+    ArtifactName: ${{ parameters.ArtifactName }}
     Environment: Prd
     BuildCondition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))

@@ -1,6 +1,10 @@
 parameters:
 - name: DocsPath
   type: string
+- name: CleanDestination
+  type: boolean
+- name: ArtifactName
+  type: string
 - name: Environment
   type: string
 - name: BuildCondition
@@ -19,15 +23,17 @@ jobs:
     rolling:
       deploy:
         steps:
+          #- ${{ if eq(parameters.CleanDestination, true) }}:
           - task: DeleteFiles@1
             inputs:
               SourceFolder: $(Pipeline.Workspace)
-              Contents: ${{ parameters.DocsPath }}
+              Contents: ${{ parameters.ArtifactName }}
           - download: current
-            artifact: ${{ parameters.DocsPath }}
+            artifact: ${{ parameters.ArtifactName }}
           - task: CopyFiles@2
             inputs:
-              SourceFolder: '$(Pipeline.Workspace)/${{ parameters.DocsPath }}'
+              SourceFolder: '$(Pipeline.Workspace)/${{ parameters.ArtifactName }}'
               Contents: '**'
               TargetFolder: 'C:\inetpub\wwwroot\${{ parameters.DocsPath }}'
-              CleanTargetFolder: true
+              CleanTargetFolder: ${{ parameters.CleanDestination }}
+              OverWrite: true
