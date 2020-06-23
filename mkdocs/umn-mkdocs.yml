@@ -7,7 +7,9 @@ parameters:
   default: true
 - name: ArtifactName
   type: string
-  default: $(DocsPath)
+
+variables:
+  ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
 
 jobs:
 - job: build
@@ -22,25 +24,25 @@ jobs:
       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
-    artifact: ${{ parameters.ArtifactName }}
+    artifact: ${{ variables.ArtifactName }}
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ parameters.ArtifactName }}
+    ArtifactName: ${{ variables.ArtifactName }}
     Environment: Dev
     BuildCondition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/heads/dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ parameters.ArtifactName }}
+    ArtifactName: ${{ variables.ArtifactName }}
     Environment: Tst
     BuildCondition: and(succeeded(), not(startsWith(variables['build.sourceBranch'], 'refs/heads/dev')))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ parameters.ArtifactName }}
+    ArtifactName: ${{ variables.ArtifactName }}
     Environment: Prd
     BuildCondition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
