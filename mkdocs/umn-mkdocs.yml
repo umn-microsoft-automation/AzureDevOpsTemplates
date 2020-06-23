@@ -8,9 +8,6 @@ parameters:
 - name: ArtifactName
   type: string
 
-variables:
-  ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
-
 jobs:
 - job: build
   steps:
@@ -24,25 +21,25 @@ jobs:
       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
-    artifact: ${{ variables.ArtifactName }}
+    artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ variables.ArtifactName }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     Environment: Dev
     BuildCondition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/heads/dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ variables.ArtifactName }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     Environment: Tst
     BuildCondition: and(succeeded(), not(startsWith(variables['build.sourceBranch'], 'refs/heads/dev')))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ variables.ArtifactName }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     Environment: Prd
     BuildCondition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
