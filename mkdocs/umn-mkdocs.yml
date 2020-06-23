@@ -12,14 +12,15 @@ parameters:
 jobs:
 - job: build
   steps:
-
+  - script: |
+      sudo npm i -g markdownlint-cli
+      markdownlint "**/*.md"
+    continueOnError: true
+    displayName: Run Markdownlint
   - script: |
       docker pull squidfunk/mkdocs-material
       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
-  - script: |
-      sudo npm i -g markdownlint-cli
-      markdownlint "**/*.md" -o $(Build.ArtifactStagingDirectory)/mdl.txt
-    continueOnError: true
+    displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ parameters.ArtifactName }}
 - template: deploy-docs.yml
