@@ -12,11 +12,24 @@ parameters:
 jobs:
 - job: build
   steps:
+  # - script: |
+  #     sudo npm i -g markdownlint-cli
+  #     markdownlint "**/*.md"
+  #   continueOnError: true
+  #   displayName: Run Markdownlint
   - script: |
-      sudo npm i -g markdownlint-cli
-      markdownlint "**/*.md"
-    continueOnError: true
-    displayName: Run Markdownlint
+      git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit
+      cd markdownlint-cli
+      npm install
+      cd ..
+      node markdownlint-cli/markdownlint.js -j $(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml
+    displayName: Markdown Lint
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testResultsFormat: JUnit
+      testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
+      failTaskOnFailedTests: false
   - script: |
       docker pull squidfunk/mkdocs-material
       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
