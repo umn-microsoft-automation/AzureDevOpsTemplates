@@ -22,7 +22,7 @@ jobs:
       pushd "$(Agent.BuildDirectory)/markdownlint-cli"
       npm install
       popd
-      node markdownlint-cli/markdownlint.js -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "**/*.md"
+      node "$(Agent.BuildDirectory)/markdownlint-cli/markdownlint.js" -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "**/*.md"
     displayName: Markdown Lint
     continueOnError: true
   - task: PublishTestResults@2
