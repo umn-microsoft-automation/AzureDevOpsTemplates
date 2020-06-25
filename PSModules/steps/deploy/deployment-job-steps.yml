@@ -17,6 +17,7 @@ steps:
       ModuleName: ${{ parameters.ModuleName }}
       RepoName: ${{ parameters.RepoName }}
   - powershell: |
+      [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
       $installPath = Join-Path (Join-Path $env:ProgramFiles "WindowsPowerShell") "Modules"
       $psd1 = Get-Module -ListAvailable ${{ parameters.ModuleName }} | Where-Object Version -eq '$(PackageVersion)'.Split('-')[0]
       $module = (Import-PowerShellDataFile -Path $psd1.Path)
