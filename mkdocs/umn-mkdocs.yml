@@ -18,11 +18,11 @@ jobs:
   #   continueOnError: true
   #   displayName: Run Markdownlint
   - script: |
-      git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit
-      cd markdownlint-cli
+      git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit "$(Agent.BuildDirectory)/markdownlint-cli"
+      pushd "$(Agent.BuildDirectory)/markdownlint-cli"
       npm install
-      cd ..
-      node markdownlint-cli/markdownlint.js -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" -i markdownlint-cli "**/*.md"
+      popd
+      node markdownlint-cli/markdownlint.js -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "**/*.md"
     displayName: Markdown Lint
     continueOnError: true
   - task: PublishTestResults@2
