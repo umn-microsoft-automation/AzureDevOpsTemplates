@@ -24,6 +24,7 @@ jobs:
       cd ..
       node markdownlint-cli/markdownlint.js -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "**/*.md"
     displayName: Markdown Lint
+    continueOnError: true
   - task: PublishTestResults@2
     displayName: Publish Test Results
     inputs:
