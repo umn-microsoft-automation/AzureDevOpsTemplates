@@ -20,7 +20,12 @@ steps:
       $installPath = Join-Path (Join-Path $env:ProgramFiles "WindowsPowerShell") "Modules"
       $psd1 = Get-Module -ListAvailable ${{ parameters.ModuleName }} | Where-Object Version -eq '$(PackageVersion)'.Split('-')[0]
       $module = (Import-PowerShellDataFile -Path $psd1.Path)
-      Get-PSRepository
+      ($repos = Get-PSRepository)
+      if ($repos.Name -notcontains 'PSGallery') {
+        Write-Host "PowerShell Gallery not found, registering it now"
+        Register-PSRepository -Default -Verbose
+        Get-PSRepository
+      }
       foreach ($req in $module.RequiredModules) {
         if ($module.PrivateData.PSData.ExternalModuleDependencies -contains $req) {
           if (-not (Get-Module -ListAvailable $req)) {
