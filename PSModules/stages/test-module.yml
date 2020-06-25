@@ -75,3 +75,13 @@ stages:
           failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
           testRunTitle: "Pester on $(PSPlatform)"
         condition: succeededOrFailed()
+      - task: PublishTestResults@2
+        displayName: Publish Test Results
+        inputs:
+          testResultsFormat: JUnit
+          testResultsFiles: "$(Build.SourcesDirectory)/Tests/*.xml"
+          buildPlatform: $(PSPlatform)
+          #buildConfiguration: ${{ parameters.configurationName }}
+          failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
+          testRunTitle: "Pester on $(PSPlatform)"
+        condition: succeededOrFailed()
