@@ -18,7 +18,7 @@ steps:
       RepoName: ${{ parameters.RepoName }}
   - powershell: |
       $installPath = Join-Path (Join-Path $env:ProgramFiles "WindowsPowerShell") "Modules"
-      $psd1 = Get-Module -ListAvailable ${{ parameters.ModuleName }} | Where-Object Version -eq '$(PackageVersion)'.Split('-')[0]-
+      $psd1 = Get-Module -ListAvailable ${{ parameters.ModuleName }} | Where-Object Version -eq '$(PackageVersion)'.Split('-')[0]
       $module = (Import-PowerShellDataFile -Path $psd1.Path)
       Get-PSRepository
       foreach ($req in $module.RequiredModules) {
