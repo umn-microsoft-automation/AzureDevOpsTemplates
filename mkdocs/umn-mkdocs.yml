@@ -22,7 +22,7 @@ jobs:
       cd markdownlint-cli
       npm install
       cd ..
-      node markdownlint-cli/markdownlint.js -j $(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml
+      node markdownlint-cli/markdownlint.js -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "**/*.md"
     displayName: Markdown Lint
   - task: PublishTestResults@2
     displayName: Publish Test Results
