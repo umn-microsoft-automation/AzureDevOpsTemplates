@@ -8,6 +8,9 @@ parameters:
 - name: ArtifactName
   type: string
   default: ''
+- name: FailOnTestFailure
+  type: boolean
+  default: true
 
 jobs:
 - job: build
@@ -30,7 +33,7 @@ jobs:
     inputs:
       testResultsFormat: JUnit
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
-      failTaskOnFailedTests: false
+      failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - script: |
       docker pull squidfunk/mkdocs-material
       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
