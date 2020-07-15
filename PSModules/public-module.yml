@@ -1,0 +1,29 @@
+# template
+parameters:
+- name: ModuleName
+  type: string
+- name: FailOnTestFailure
+  type: boolean
+  default: true
+
+variables:
+- group: my-variable-group
+
+steps:
+  - powershell: gci env:
+
+
+# stages:
+# - template: stages/build-module.yml
+#   parameters:
+#     ModuleName: ${{ parameters.ModuleName }}
+# - template: stages/test-module.yml
+#   parameters:
+#     ModuleName: ${{ parameters.ModuleName }}
+#     FailOnTestFailure: ${{ parameters.FailOnTestFailure }}
+# - template: stages/deploy-module-public.yml
+#   parameters:
+#     ModuleName: ${{ parameters.ModuleName }}
+#     RepoPath: ${{ parameters.RepoPath }}
+#     RepoName: ${{ parameters.RepoName }}
+#     GitHubPAT: ${{ parameters.GitHubPAT }}

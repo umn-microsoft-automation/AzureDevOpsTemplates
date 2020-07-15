@@ -21,7 +21,7 @@ stages:
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
     FailOnTestFailure: ${{ parameters.FailOnTestFailure }}
-- template: stages/deploy-module.yml
+- template: stages/deploy-module-internal.yml
   parameters:
     ModuleName: ${{ parameters.ModuleName }}
     RepoPath: ${{ parameters.RepoPath }}
