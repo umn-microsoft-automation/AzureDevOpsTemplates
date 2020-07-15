@@ -6,8 +6,6 @@ parameters:
   type: boolean
   default: true
 
-variables:
-- template: variables.yml
 stages:
 - stage: stage
   jobs:
