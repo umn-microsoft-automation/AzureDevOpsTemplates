@@ -6,8 +6,8 @@ parameters:
   type: boolean
   default: true
 
-variables:
-- group: my-variable-group
+# variables:
+# - group: my-variable-group
 
 steps:
   - powershell: |
