@@ -8,11 +8,13 @@ parameters:
 
 # variables:
 # - group: my-variable-group
-jobs:
-  - job: job
-    steps:
-      - powershell: |
-          gci env:
+stages:
+- stage: stage
+  jobs:
+    - job: job
+      steps:
+        - powershell: |
+            gci env:
 
 
 # stages:
