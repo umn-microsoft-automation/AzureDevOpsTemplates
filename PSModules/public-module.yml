@@ -6,8 +6,8 @@ parameters:
   type: boolean
   default: true
 
-# variables:
-# - group: my-variable-group
+variables:
+- template: variables.yml
 stages:
 - stage: stage
   jobs:
