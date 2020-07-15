@@ -10,7 +10,8 @@ variables:
 - group: my-variable-group
 
 steps:
-  - powershell: gci env:
+  - powershell: |
+      gci env:
 
 
 # stages:
