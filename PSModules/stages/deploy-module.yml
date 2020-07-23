@@ -74,16 +74,25 @@ stages:
 
           $uri = $uribase + "repos" + $uribuilder.Path + "/releases"
 
-          $body = @{
-            tag_name="v$env:PUBLISHMODULE_PACKAGEVERSION"
-            target_commitish= "$(Build.SourceVersion)"
-            name = "${{ parameters.ModuleName }} v$env:PUBLISHMODULE_PACKAGEVERSION"
-            } | ConvertTo-Json
-          write-host $body
-          ($release = Invoke-RestMethod -Uri $uri -Headers $ghHeader -Body $body -Method Post)
+          # Test the credential to see if it has the access required.  If not, handle errors; otherwise proceed.  
+          try {
+              Invoke-WebRequest -Headers $ghHeader
+          } catch [System.Net.WebException] {
+              Write-Host "Error - Invalid credential or credential does not have repository access"
+              Write-HOst "$($_.Exception.Message)"
+              $_.Exception.Response
+          } finally {
+              $body = @{
+              tag_name="v$env:PUBLISHMODULE_PACKAGEVERSION"
+              target_commitish= "$(Build.SourceVersion)"
+              name = "${{ parameters.ModuleName }} v$env:PUBLISHMODULE_PACKAGEVERSION"
+              } | ConvertTo-Json
+              write-host $body
+              ($release = Invoke-RestMethod -Uri $uri -Headers $ghHeader -Body $body -Method Post)
 
-          $uploadurl = ($release.upload_url).Split('{')[0] + '?name=${{ parameters.ModuleName }}.zip'
-          ($asset = Invoke-RestMethod -Uri $uploadurl -Method Post -InFile '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip' -Headers $ghHeader -ContentType 'application/zip')
+              $uploadurl = ($release.upload_url).Split('{')[0] + '?name=${{ parameters.ModuleName }}.zip'
+              ($asset = Invoke-RestMethod -Uri $uploadurl -Method Post -InFile '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip' -Headers $ghHeader -ContentType 'application/zip')
+          }
         displayName: Publish Release
         condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
     - deployment: Test
