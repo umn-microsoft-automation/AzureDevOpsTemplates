@@ -66,4 +66,4 @@ jobs:
     CleanDestination: ${{ parameters.CleanDestination }}
     ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     Environment: Prd
-    BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}''))
+    BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
