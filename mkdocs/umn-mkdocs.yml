@@ -52,7 +52,7 @@ jobs:
     CleanDestination: ${{ parameters.CleanDestination }}
     ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     Environment: Dev
-    BuildCondition: and(succeeded(), eq(parameters['DevDeploys'], true), startsWith(variables['build.sourceBranchName'], 'dev'))
+    BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
