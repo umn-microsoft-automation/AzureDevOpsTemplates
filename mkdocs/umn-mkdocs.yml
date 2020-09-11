@@ -11,6 +11,12 @@ parameters:
 - name: FailOnTestFailure
   type: boolean
   default: true
+- name: DefaultBranch
+  type: string
+  default: master
+- name: DevDeploys
+  type: boolean
+  default: false
 
 jobs:
 - job: build
@@ -25,7 +31,7 @@ jobs:
       pushd "$(Agent.BuildDirectory)/markdownlint-cli"
       npm install
       popd
-      node "$(Agent.BuildDirectory)/markdownlint-cli/markdownlint.js" -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "**/*.md"
+      node "$(Agent.BuildDirectory)/markdownlint-cli/markdownlint.js" -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "docs/**/*.md"
     displayName: Markdown Lint
     continueOnError: true
   - task: PublishTestResults@2
@@ -46,18 +52,18 @@ jobs:
     CleanDestination: ${{ parameters.CleanDestination }}
     ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     Environment: Dev
-    BuildCondition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/heads/dev'))
+    BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
     ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     Environment: Tst
-    BuildCondition: and(succeeded(), not(startsWith(variables['build.sourceBranch'], 'refs/heads/dev')))
+    BuildCondition: or(and(succeeded(), not(startsWith(variables['build.sourceBranchName'], 'dev')), eq(${{ parameters.DevDeploys }}, true)), and(succeeded(), eq(${{ parameters.DevDeploys }}, false)))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
     ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     Environment: Prd
-    BuildCondition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+    BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
