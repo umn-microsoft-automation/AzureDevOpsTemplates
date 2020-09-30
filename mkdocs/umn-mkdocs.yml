@@ -41,8 +41,8 @@ jobs:
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - script: |
-      docker pull squidfunk/mkdocs-material
-      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
+      echo -e "FROM squidfunk/mkdocs-material \n RUN pip install mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin" | docker build -t squidfunk/mkdocs-material -
+      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material:latest build
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
