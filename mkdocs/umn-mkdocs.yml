@@ -42,7 +42,7 @@ jobs:
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - script: |
       docker pull squidfunk/mkdocs-material:5.5.14
-      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
+      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material:5.5.14 build
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
