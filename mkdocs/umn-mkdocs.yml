@@ -55,9 +55,7 @@ jobs:
     inputs:
       scriptSource: inline
       script: |
-        import yaml, json, os, sys
-
-        print(f"Python Version {sys.version}")
+        import yaml, json, os
 
         with open("mkdocs.yml", "r") as f:
             meta = yaml.load(f, Loader=yaml.BaseLoader)
@@ -69,6 +67,8 @@ jobs:
     inputs:
       scriptSource: inline
       script: |
+        import os
+
         config = """<?xml version="1.0" encoding="UTF-8"?>
         <configuration>
             <system.webServer>
