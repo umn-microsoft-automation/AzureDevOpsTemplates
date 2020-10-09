@@ -48,6 +48,9 @@ jobs:
     inputs:
       versionSpec: 3.x
       addToPath: true
+  - script: |
+      pip install pyyaml
+    displayName: Install Python dependencies
   - task: PythonScript@0
     inputs:
       scriptSource: inline
