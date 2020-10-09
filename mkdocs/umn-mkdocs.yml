@@ -77,9 +77,9 @@ jobs:
                 </handlers>
             </system.webServer>
         </configuration>"""
-        with open(os.path.join("$(Build.ArtifactStagingDirectory)","app.config"), "w", newline="\r\n") as f:
+        with open(os.path.join("$(Build.ArtifactStagingDirectory)","web.config"), "w", newline="\r\n") as f:
             f.write(config)
-    displayName: write app.config
+    displayName: write web.config
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
 - template: deploy-docs.yml
