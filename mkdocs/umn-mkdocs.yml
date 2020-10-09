@@ -44,6 +44,39 @@ jobs:
       echo -e "FROM squidfunk/mkdocs-material \n RUN pip install mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin" | docker build -t squidfunk/mkdocs-material -
       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
     displayName: mkdocs-material build
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: 3.x
+      addToPath: true
+  - task: PythonScript@0
+    inputs:
+      scriptSource: inline
+      script: |
+        import yaml, json, os, sys
+
+        print(f"Python Version {sys.version}")
+
+        with open("mkdocs.yml", "r") as f:
+            meta = yaml.load(f, Loader=yaml.BaseLoader)
+        meta_final = {key: meta.get(key, "").strip() for key in ["site_name", "site_description"]}
+        with open(os.path.join("$(Build.ArtifactStagingDirectory)","metadata.json"), "w") as f:
+            json.dump(meta_final, f)
+    displayName: write site metadata to json
+  - task: PythonScript@0
+    inputs:
+      scriptSource: inline
+      script: |
+        config = """<?xml version="1.0" encoding="UTF-8"?>
+        <configuration>
+            <system.webServer>
+                <handlers>
+                    <remove name="Python FastCGI" />
+                </handlers>
+            </system.webServer>
+        </configuration>"""
+        with open(os.path.join("$(Build.ArtifactStagingDirectory)","app.config"), "w", newline="\r\n") as f:
+            f.write(config)
+    displayName: write app.config
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
 - template: deploy-docs.yml
