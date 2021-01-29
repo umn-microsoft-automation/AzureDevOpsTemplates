@@ -9,6 +9,9 @@ parameters:
 - name: FailOnTestFailure
   type: boolean
   default: true
+- name: DefaultBranch
+  type: string
+  default: master
 - name: GitHubPAT
   type: string
   default: "this will fail"

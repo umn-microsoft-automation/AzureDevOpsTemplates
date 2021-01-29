@@ -11,7 +11,7 @@ parameters:
 stages:
 - stage: Deploy
   dependsOn: Test
-  #condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+  #condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
   jobs:
     - job: Publish
       pool: Default
@@ -56,7 +56,7 @@ stages:
           includeRootFolder: true
           archiveType: zip
           archiveFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip'
-        condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+        condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
       - powershell: |
           gci env:
           $auth = '${{ parameters.GitHubPAT }}'
@@ -85,7 +85,7 @@ stages:
           $uploadurl = ($release.upload_url).Split('{')[0] + '?name=${{ parameters.ModuleName }}.zip'
           ($asset = Invoke-RestMethod -Uri $uploadurl -Method Post -InFile '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip' -Headers $ghHeader -ContentType 'application/zip')
         displayName: Publish Release
-        condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+        condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
     - deployment: Test
       dependsOn: Publish
       variables:
@@ -103,7 +103,7 @@ stages:
                   RepoName: ${{ parameters.RepoName }}
                   ModuleName: ${{ parameters.ModuleName }}
     - deployment: Production
-      condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+      condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
       dependsOn: Publish
       variables:
         PackageVersion: $[ dependencies.Publish.outputs['PublishModule.PackageVersion']]
