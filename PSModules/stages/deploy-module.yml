@@ -5,6 +5,8 @@ parameters:
   type: string
 - name: RepoName
   type: string
+- name: DefaultBranch
+  type: string
 - name: GitHubPAT
   type: string
 

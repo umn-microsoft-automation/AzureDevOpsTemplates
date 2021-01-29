@@ -29,4 +29,5 @@ stages:
     ModuleName: ${{ parameters.ModuleName }}
     RepoPath: ${{ parameters.RepoPath }}
     RepoName: ${{ parameters.RepoName }}
+    DefaultBranch: ${{ parameters.DefaultBranch }}
     GitHubPAT: ${{ parameters.GitHubPAT }}
