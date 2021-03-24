@@ -17,10 +17,15 @@ parameters:
 - name: DevDeploys
   type: boolean
   default: false
+- name: Submodules
+  type: boolean
+  default: false
 
 jobs:
 - job: build
   steps:
+  - checkout: self
+    submodules: ${{ parameters.Submodules }}
   # - script: |
   #     sudo npm i -g markdownlint-cli
   #     markdownlint "**/*.md"
