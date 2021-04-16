@@ -118,15 +118,15 @@ steps:
 #     Inline: |
 #       [version]"1.0.0.zip"
 
-- task: AzurePowerShell@4
-  #continueOnError: true
-  inputs:
-    azureSubscription: ${{ parameters.AzureAccount }}
-    ScriptType: InlineScript
-    azurePowerShellVersion: 'LatestVersion'
-    FailOnStandardError: true
-    Inline: |
-      [version]"1.0.0.zip"
+# - task: AzurePowerShell@4
+#   #continueOnError: true
+#   inputs:
+#     azureSubscription: ${{ parameters.AzureAccount }}
+#     ScriptType: InlineScript
+#     azurePowerShellVersion: 'LatestVersion'
+#     FailOnStandardError: true
+#     Inline: |
+#       [version]"1.0.0.zip"
 
 - powershell: |
     [version]"1.0.0.zip"
