@@ -22,12 +22,17 @@ parameters:
 
 
 steps:
+# - powershell: |
+#     $psModulePath = Join-Path (Join-Path $env:ProgramFiles "WindowsPowerShell") "Modules"
+#     Write-Host "##vso[task.setvariable variable=psModulePath;]$psModulePath"
+
 - task: DownloadPackage@1
   displayName: 'Download Local BuildHelpers'
   inputs:
     feed: ${{ parameters.BHPackageFeed }}
     definition: ${{ parameters.BHPackageDefinition }}
     version: ${{ parameters.BHPackageVersion }}
+    downloadPath: '$(System.ArtifactsDirectory)\BuildHelpers'
   enabled: ${{ parameters.DownloadBuildHelpers }}
 
 - powershell: |
@@ -52,7 +57,7 @@ steps:
     gci C:\Modules\az*
   errorActionPreference: continue
   displayName: 'run PS'
-  enabled: eq(variables['System.Debug'], 'True')
+  enabled: ${{ eq(variables['System.Debug'], 'True') }}
 
 - powershell: |
     #I've made a number of PRs against the BuildHelpers project and some have been accepted but some are being ignored
@@ -60,15 +65,46 @@ steps:
     #https://github.com/FISHMANPET/BuildHelpers/tree/umnmaster
     #This branch contains my pull requests, and is the version deployed in Azure Artifacts that will be downloaded
     #If my changes get merged and pushed to the PSGallery that step can be disabled, and this will default to using the gallery version
-    if (Test-Path "$ENV:System_ArtifactsDirectory\BuildHelpers.psd1") {
-        #If we have downloaded a version of BuildHelpers locally we'll use that
-        Import-Module "$ENV:System_ArtifactsDirectory\BuildHelpers.psd1" -Verbose
-    } else {
+    if (-not Test-Path "$ENV:System_ArtifactsDirectory\BuildHelpers\BuildHelpers.psd1") {
         #We didn't download a copy locally so let's get it from the gallery
         Install-Module BuildHelpers -Force -Verbose
     }
     Install-Module Pester -RequiredVersion 4.10.1 -Force -WarningAction Continue -Verbose
   enabled: false
+  displayName: Install Prereqrusites
+
+- powershell: |
+    $commitMsg = (& git show -s --format=%B) -join ';'
+    $defaultRun = [bool]($(Build.SourceBranchName) -eq ${{ parameters.DefaultBranch }})
+    $prRun = [bool]($(Build.Reason) -eq 'PullRequest')
+    $testRun = [bool](-not ($defaultRun -or $prRun))
+    Write-Host "##vso[task.setvariable variable=rbCommitMsg;]$commitMsg"
+    Write-Host "##vso[task.setvariable variable=rbDefaultRun;]$defaultRun"
+    Write-Host "##vso[task.setvariable variable=rbPrRun;]$prRun"
+    Write-Host "##vso[task.setvariable variable=rbTestRun;]$testRun"
+  displayName: Set Variables
+
+- powershell: |
+    if ([System.Convert]::ToBoolean("$(rbDefaultRun)")) {
+      $codeToSyntaxCheck = Get-ChildItem $projectRoot -Include *.ps1, *.psm1, *.psd1 -Recurse
+      #$codeCouldTest = Get-ChildItem $projectRoot -Include *.ps1, *.psm1, *.psd1 -Recurse | Where-Object PSParentPath -NotMatch "Build|Tests|junk|Deploy|.vscode"
+      $codeForProdVariables = $codeCouldTest
+      $codeForTestVariables = Get-GitChangedFile -Include "*.ps1", "*.psm1", "*.psd1" -Exclude $excludes -DiffFilter "AMRC"
+      write-host "default"
+    } elseif ([System.Convert]::ToBoolean("$(rbPrRun)") -or [System.Convert]::ToBoolean("$(rbTestRun)")) {
+      #$codeToSyntaxCheck = Get-GitChangedFile -LeftRevision "origin/master" -Include "*.ps1", "*.psm1", "*.psd1" -DiffFilter "AMRC"
+      #$codeCouldTest = Get-GitChangedFile -LeftRevision "origin/master" -Include "*.ps1", "*.psm1", "*.psd1" -Exclude $excludes -DiffFilter "AMRC"
+      $codeForProdVariables = $codeCouldTest
+      $codeForTestVariables = $codeCouldTest
+      write-host "test"
+    } else {
+      $codeToSyntaxCheck = Get-GitChangedFile -Include "*.ps1", "*.psm1", "*.psd1" -DiffFilter "AMRC"
+      $codeCouldTest = Get-GitChangedFile -Include "*.ps1", "*.psm1", "*.psd1" -Exclude $excludes -DiffFilter "AMRC"
+      $codeForProdVariables = $codeCouldTest
+      $codeForTestVariables = $codeCouldTest
+      write-host "else"
+    }
+  displayName: Determine Tests
 
 # jobs:
 # - job: build
