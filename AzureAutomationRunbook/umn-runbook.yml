@@ -1,0 +1,121 @@
+# template
+parameters:
+- name: FailOnTestFailure
+  type: boolean
+  default: true
+- name: DefaultBranch
+  type: string
+  default: master
+- name: DevDeploys
+  type: boolean
+  default: false
+- name: DownloadBuildHelpers
+  type: boolean
+  default: false
+- name: BHPackageFeed
+  type: string
+- name: BHPackageDefinition
+  type: string
+- name: BHPackageVersion
+  type: string
+
+
+
+steps:
+- task: DownloadPackage@1
+  displayName: 'Download Local BuildHelpers'
+  inputs:
+    feed: ${{ parameters.BHPackageFeed }}
+    definition: ${{ parameters.BHPackageDefinition }}
+    version: ${{ parameters.BHPackageVersion }}
+  enabled: ${{ parameters.DownloadBuildHelpers }}
+
+- powershell: |
+    # Test task for checking environment info
+    # can be disabled unless doing development
+    #gci $ENV:System_ArtifactsDirectory
+    #test-path "$ENV:System_ArtifactsDirectory\buildhelpers.nupkg"
+    #Install-Package "$ENV:System_ArtifactsDirectory\buildhelpers.nupkg"
+
+    #get-command Get-GitChangedFile -syntax
+
+    # Use the environment variables input below to pass secret variables to this script.
+
+    $env:PSModulePath
+
+    #get-module -ListAvailable az.accounts |fl
+
+    #Import-Module Az.Accounts, Az.Automation
+
+    #get-module -ListAvailable az.accounts |fl
+
+    gci C:\Modules\az*
+  errorActionPreference: continue
+  displayName: 'run PS'
+  enabled: eq(variables['System.Debug'], 'True')
+
+- powershell: |
+    #I've made a number of PRs against the BuildHelpers project and some have been accepted but some are being ignored
+    #I have a branch in my fork, called umnmaster
+    #https://github.com/FISHMANPET/BuildHelpers/tree/umnmaster
+    #This branch contains my pull requests, and is the version deployed in Azure Artifacts that will be downloaded
+    #If my changes get merged and pushed to the PSGallery that step can be disabled, and this will default to using the gallery version
+    if (Test-Path "$ENV:System_ArtifactsDirectory\BuildHelpers.psd1") {
+        #If we have downloaded a version of BuildHelpers locally we'll use that
+        Import-Module "$ENV:System_ArtifactsDirectory\BuildHelpers.psd1" -Verbose
+    } else {
+        #We didn't download a copy locally so let's get it from the gallery
+        Install-Module BuildHelpers -Force -Verbose
+    }
+    Install-Module Pester -RequiredVersion 4.10.1 -Force -WarningAction Continue -Verbose
+  enabled: false
+
+# jobs:
+# - job: build
+#   steps:
+#   # - script: |
+#   #     sudo npm i -g markdownlint-cli
+#   #     markdownlint "**/*.md"
+#   #   continueOnError: true
+#   #   displayName: Run Markdownlint
+#   - script: |
+#       git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit "$(Agent.BuildDirectory)/markdownlint-cli"
+#       pushd "$(Agent.BuildDirectory)/markdownlint-cli"
+#       npm install
+#       popd
+#       node "$(Agent.BuildDirectory)/markdownlint-cli/markdownlint.js" -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "docs/**/*.md"
+#     displayName: Markdown Lint
+#     continueOnError: true
+#   - task: PublishTestResults@2
+#     displayName: Publish Test Results
+#     inputs:
+#       testResultsFormat: JUnit
+#       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
+#       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
+#   - script: |
+#       echo -e "FROM squidfunk/mkdocs-material \n RUN pip install mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin" | docker build -t squidfunk/mkdocs-material -
+#       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
+#     displayName: mkdocs-material build
+#   - publish: $(Build.ArtifactStagingDirectory)
+#     artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+# - template: deploy-docs.yml
+#   parameters:
+#     DocsPath: ${{ parameters.DocsPath }}
+#     CleanDestination: ${{ parameters.CleanDestination }}
+#     ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+#     Environment: Dev
+#     BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
+# - template: deploy-docs.yml
+#   parameters:
+#     DocsPath: ${{ parameters.DocsPath }}
+#     CleanDestination: ${{ parameters.CleanDestination }}
+#     ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+#     Environment: Tst
+#     BuildCondition: or(and(succeeded(), not(startsWith(variables['build.sourceBranchName'], 'dev')), eq(${{ parameters.DevDeploys }}, true)), and(succeeded(), eq(${{ parameters.DevDeploys }}, false)))
+# - template: deploy-docs.yml
+#   parameters:
+#     DocsPath: ${{ parameters.DocsPath }}
+#     CleanDestination: ${{ parameters.CleanDestination }}
+#     ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+#     Environment: Prd
+#     BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
