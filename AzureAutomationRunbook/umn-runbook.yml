@@ -75,8 +75,8 @@ steps:
 
 - powershell: |
     $commitMsg = (& git show -s --format=%B) -join ';'
-    $defaultRun = [bool]("$(Build.SourceBranchName)" -eq ${{ parameters.DefaultBranch }})
-    $prRun = [bool]("$(Build.Reason)" -eq 'PullRequest')
+    $defaultRun = [bool]('$(Build.SourceBranchName)' -eq '${{ parameters.DefaultBranch }}')
+    $prRun = [bool]('$(Build.Reason)' -eq 'PullRequest')
     $testRun = [bool](-not ($defaultRun -or $prRun))
     Write-Host "##vso[task.setvariable variable=rbCommitMsg;]$commitMsg"
     Write-Host "##vso[task.setvariable variable=rbDefaultRun;]$defaultRun"
