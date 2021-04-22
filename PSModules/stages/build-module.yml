@@ -7,6 +7,9 @@ stages:
   jobs:
     - job: Build
       steps:
+        - task: gitversion/setup@0
+          inputs:
+            versionSpec: '5.x'
         # https://github.com/PoshCode/Azure-Pipelines/blob/master/Install-RequiredModule-step.yml
         - powershell: |
             # Apparently, Install-Script isn't good enough except on Windows?
@@ -23,9 +26,6 @@ stages:
                 "mode: Mainline" | Set-Content '$(Build.SourcesDirectory)/GitVersion.yml'
             }
           displayName: Create gitversion.yml if none exists
-        - task: gitversion/setup@0
-          inputs:
-            versionSpec: '5.x'
         - task: gitversion/execute@0
         - powershell: |
             gci env:
