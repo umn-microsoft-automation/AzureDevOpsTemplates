@@ -1,0 +1,89 @@
+parameters:
+- name: ModuleName
+  type: string
+- name: RepoPath
+  type: string
+- name: RepoName
+  type: string
+- name: GitHubPAT
+  type: string
+
+stages:
+- stage: Deploy
+  dependsOn: Test
+  #condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+  jobs:
+    - job: Publish
+      pool: Default
+      workspace:
+        clean: all
+      steps:
+      - checkout: none
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          artifactName: ${{ parameters.ModuleName }}
+          targetPath: $(Build.ArtifactStagingDirectory)
+      - template: ../steps/deploy/register-psrepository-step.yml
+        parameters:
+          RepoPath: ${{ parameters.RepoPath }}
+          RepoName: ${{ parameters.RepoName }}
+      - powershell: |
+          Write-Host "$(Agent.TempDirectory)"
+          gci "$(Agent.TempDirectory)"
+          $module = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
+          foreach ($req in $module.RequiredModules) {
+            Save-Module -Name $req -Path $(Agent.TempDirectory)
+          }
+        displayName: Download Module Dependencies
+      - powershell: |
+          $env:PSModulePath = $env:PSModulePath + [System.IO.Path]::PathSeparator + "$(Agent.TempDirectory)"
+          gci "$(Agent.TempDirectory)"
+          $test = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
+          if ($test.PrivateData.PSData.Prerelease) {
+            $version = "$($test.version)-$($test.PrivateData.PSData.Prerelease)"
+          } else {
+            $version = $test.Version.ToString()
+          }
+          #$version = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1').ModuleVersion
+          Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*' -Repository '${{ parameters.RepoName }}' -Force
+          Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
+          Write-Host "##vso[task.setvariable variable=PackageVersion;isOutput=true]$version"
+        displayName: Publish Module
+        name: PublishModule
+      - task: ArchiveFiles@2
+        inputs:
+          rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}'
+          includeRootFolder: true
+          archiveType: zip
+          archiveFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip'
+        condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+      - powershell: |
+          gci env:
+          $auth = '${{ parameters.GitHubPAT }}'
+          $ghHeader = @{ Authorization = "Basic "+ [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($auth)) }
+
+          $repositoryUri = $Env:BUILD_REPOSITORY_URI
+
+          $uribuilder = [System.UriBuilder]$repositoryUri
+          if ($uribuilder.Host -eq "github.com") {
+              $ghHost = "api.github.com"
+          } else {
+              $ghHost = $uribuilder.Host
+          }
+          $uribase = $uribuilder.Scheme + "://" + $ghHost + "/api/v3/"
+
+          $uri = $uribase + "repos" + $uribuilder.Path + "/releases"
+
+          $body = @{
+            tag_name="v$env:PUBLISHMODULE_PACKAGEVERSION"
+            target_commitish= "$(Build.SourceVersion)"
+            name = "${{ parameters.ModuleName }} v$env:PUBLISHMODULE_PACKAGEVERSION"
+            } | ConvertTo-Json
+          write-host $body
+          ($release = Invoke-RestMethod -Uri $uri -Headers $ghHeader -Body $body -Method Post)
+
+          $uploadurl = ($release.upload_url).Split('{')[0] + '?name=${{ parameters.ModuleName }}.zip'
+          ($asset = Invoke-RestMethod -Uri $uploadurl -Method Post -InFile '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip' -Headers $ghHeader -ContentType 'application/zip')
+        displayName: Publish Release
+        condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+    
