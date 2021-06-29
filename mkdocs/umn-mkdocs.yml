@@ -21,19 +21,33 @@ parameters:
 jobs:
 - job: build
   steps:
+  - bash: |
+      cat << EOF > markdownlint-cli2.jsonc
+      {
+        "outputFormatters": [
+          [ "markdownlint-cli2-formatter-junit", { "name": "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ]
+        ]
+      }
+      EOF
+      npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
+      markdownlint "docs/**/*.md"
+      echo "return code"
+      echo $?
+      case $? in
+        0 | 1)
+          exit 0
+        *)
+          exit $?
+    #continueOnError: true
+    displayName: Run Markdownlint
   # - script: |
-  #     sudo npm i -g markdownlint-cli
-  #     markdownlint "**/*.md"
+  #     git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit "$(Agent.BuildDirectory)/markdownlint-cli"
+  #     pushd "$(Agent.BuildDirectory)/markdownlint-cli"
+  #     npm install
+  #     popd
+  #     node "$(Agent.BuildDirectory)/markdownlint-cli/markdownlint.js" -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "docs/**/*.md"
+  #   displayName: Markdown Lint
   #   continueOnError: true
-  #   displayName: Run Markdownlint
-  - script: |
-      git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit "$(Agent.BuildDirectory)/markdownlint-cli"
-      pushd "$(Agent.BuildDirectory)/markdownlint-cli"
-      npm install
-      popd
-      node "$(Agent.BuildDirectory)/markdownlint-cli/markdownlint.js" -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "docs/**/*.md"
-    displayName: Markdown Lint
-    continueOnError: true
   - task: PublishTestResults@2
     displayName: Publish Test Results
     inputs:
