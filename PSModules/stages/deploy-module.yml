@@ -7,8 +7,6 @@ parameters:
   type: string
 - name: DefaultBranch
   type: string
-- name: GitHubPAT
-  type: string
 
 stages:
 - stage: Deploy

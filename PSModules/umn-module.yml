@@ -14,7 +14,7 @@ parameters:
   default: master
 - name: GitHubPAT
   type: string
-  default: "this will fail"
+  default: "not needed"
 
 stages:
 - template: stages/build-module.yml
@@ -30,4 +30,3 @@ stages:
     RepoPath: ${{ parameters.RepoPath }}
     RepoName: ${{ parameters.RepoName }}
     DefaultBranch: ${{ parameters.DefaultBranch }}
-    GitHubPAT: ${{ parameters.GitHubPAT }}
