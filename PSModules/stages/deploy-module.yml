@@ -106,52 +106,6 @@ stages:
           Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*' -Repository '${{ parameters.RepoName }}' -Force
         displayName: Publish Module
         name: PublishModule
-      # - task: ArchiveFiles@2
-      #   inputs:
-      #     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}'
-      #     includeRootFolder: true
-      #     archiveType: zip
-      #     archiveFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip'
-      #   condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
-      # - powershell: |
-      #     if ($env:SYSTEM_DEBUG -eq 'true') {
-      #       gci env:
-      #       git --no-pager config --list
-      #     }
-
-      #     $repositoryUri = $Env:BUILD_REPOSITORY_URI
-      #     $authKeyName = "http.$repositoryUri.extraheader"
-      #     if ($env:SYSTEM_DEBUG -eq 'true') {
-      #       write-host "auth key name $authKeyName"
-      #     }
-      #     $authKey = git config --get $authKeyName
-      #     if ($env:SYSTEM_DEBUG -eq 'true') {
-      #       write-host "auth key $authKey"
-      #     }
-
-      #     $uribuilder = [System.UriBuilder]$repositoryUri
-      #     if ($uribuilder.Host -eq "github.com") {
-      #         $ghHost = "api.github.com"
-      #     } else {
-      #         $ghHost = $uribuilder.Host
-      #     }
-      #     $uribase = $uribuilder.Scheme + "://" + $ghHost + "/api/v3/"
-
-      #     $uri = $uribase + "repos" + $uribuilder.Path + "/releases"
-      #     $ghHeader = @{ Authorization = $authKey.split(':').trim()[1] }
-
-      #     $body = @{
-      #       tag_name="v$env:PUBLISHMODULE_PACKAGEVERSION"
-      #       target_commitish= "$(Build.SourceVersion)"
-      #       name = "${{ parameters.ModuleName }} v$env:PUBLISHMODULE_PACKAGEVERSION"
-      #       } | ConvertTo-Json
-      #     write-host $body
-      #     ($release = Invoke-RestMethod -Uri $uri -Headers $ghHeader -Body $body -Method Post)
-
-      #     $uploadurl = ($release.upload_url).Split('{')[0] + '?name=${{ parameters.ModuleName }}.zip'
-      #     ($asset = Invoke-RestMethod -Uri $uploadurl -Method Post -InFile '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip' -Headers $ghHeader -ContentType 'application/zip')
-      #   displayName: Publish Release
-      #   condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
     - deployment: Test
       dependsOn: Publish
       variables:
