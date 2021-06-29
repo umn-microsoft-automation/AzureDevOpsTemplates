@@ -22,7 +22,7 @@ jobs:
 - job: build
   steps:
   - bash: |
-      cat << EOF > markdownlint-cli2.jsonc
+      cat << EOF > .markdownlint-cli2.jsonc
       {
         "outputFormatters": [
           [ "markdownlint-cli2-formatter-junit", { "name": "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ]
@@ -30,7 +30,7 @@ jobs:
       }
       EOF
 
-      cat markdownlint-cli2.jsonc
+      cat .markdownlint-cli2.jsonc
       ls
       sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
       markdownlint-cli2 "docs/**/*.md"
