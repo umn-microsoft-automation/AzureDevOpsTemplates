@@ -48,6 +48,8 @@ jobs:
     inputs:
       versionSpec: 3.x
       addToPath: true
+#  I believe with metadata.json being included as part of a template, installing pyyaml and generating metadata.json are not needed
+# this fails if metadata.json is in the template, I don't really care why but best guess is mismatch of UIDs between inside the mkdocs container and Azure Devops environment
   - script: |
       pip install pyyaml
     displayName: Install Python dependencies
