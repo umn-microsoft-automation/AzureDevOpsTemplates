@@ -32,7 +32,7 @@ stages:
           RepoPath: ${{ parameters.RepoPath }}
           RepoName: ${{ parameters.RepoName }}
       - powershell: |
-          if ($env:SYSTEM_DEBUG) -eq 'true') {
+          if ($env:SYSTEM_DEBUG -eq 'true') {
             Write-Host "$(Agent.TempDirectory)"
             gci "$(Agent.TempDirectory)"
           }
@@ -43,7 +43,7 @@ stages:
         displayName: Download Module Dependencies
       - powershell: |
           $env:PSModulePath = $env:PSModulePath + [System.IO.Path]::PathSeparator + "$(Agent.TempDirectory)"
-          if ($env:SYSTEM_DEBUG) -eq 'true') {
+          if ($env:SYSTEM_DEBUG -eq 'true') {
             gci "$(Agent.TempDirectory)"
           }
           $test = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
@@ -66,18 +66,18 @@ stages:
           archiveFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip'
         condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
       - powershell: |
-          if ($env:SYSTEM_DEBUG) -eq 'true') {
+          if ($env:SYSTEM_DEBUG -eq 'true') {
             gci env:
             git --no-pager config --list
           }
 
           $repositoryUri = $Env:BUILD_REPOSITORY_URI
           $authKeyName = "http.$repositoryUri.extraheader"
-          if ($env:SYSTEM_DEBUG) -eq 'true') {
+          if ($env:SYSTEM_DEBUG -eq 'true') {
             write-host "auth key name $authKeyName"
           }
           $authKey = git config --get $authKeyName
-          if ($env:SYSTEM_DEBUG) -eq 'true') {
+          if ($env:SYSTEM_DEBUG -eq 'true') {
             write-host "auth key $authKey"
           }
 
