@@ -32,7 +32,7 @@ jobs:
 
       cat .markdownlint-cli2.jsonc
       ls
-      ls $(Common.TestResultsDirectory)
+      ls -al $(Common.TestResultsDirectory)
       sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
       markdownlint-cli2 "docs/**/*.md"
       MDLINT=$?
