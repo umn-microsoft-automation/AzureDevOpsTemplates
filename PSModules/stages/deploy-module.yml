@@ -20,38 +20,24 @@ stages:
       workspace:
         clean: all
       steps:
-      - checkout: none
+      - checkout: self
+        fetchDepth: 1
+        persistCredentials: true
       - task: DownloadPipelineArtifact@2
         inputs:
           artifactName: ${{ parameters.ModuleName }}
           targetPath: $(Build.ArtifactStagingDirectory)
-      - template: ../steps/deploy/register-psrepository-step.yml
-        parameters:
-          RepoPath: ${{ parameters.RepoPath }}
-          RepoName: ${{ parameters.RepoName }}
       - powershell: |
-          Write-Host "$(Agent.TempDirectory)"
-          gci "$(Agent.TempDirectory)"
-          $module = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
-          foreach ($req in $module.RequiredModules) {
-            Save-Module -Name $req -Path $(Agent.TempDirectory)
-          }
-        displayName: Download Module Dependencies
-      - powershell: |
-          $env:PSModulePath = $env:PSModulePath + [System.IO.Path]::PathSeparator + "$(Agent.TempDirectory)"
-          gci "$(Agent.TempDirectory)"
           $test = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
           if ($test.PrivateData.PSData.Prerelease) {
             $version = "$($test.version)-$($test.PrivateData.PSData.Prerelease)"
           } else {
             $version = $test.Version.ToString()
           }
-          #$version = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1').ModuleVersion
-          Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*' -Repository '${{ parameters.RepoName }}' -Force
           Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
           Write-Host "##vso[task.setvariable variable=PackageVersion;isOutput=true]$version"
-        displayName: Publish Module
-        name: PublishModule
+        displayName: Version Module
+        name: VersionModule
       - task: ArchiveFiles@2
         inputs:
           rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}'
@@ -60,11 +46,20 @@ stages:
           archiveFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip'
         condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
       - powershell: |
-          gci env:
-          $auth = '${{ parameters.GitHubPAT }}'
-          $ghHeader = @{ Authorization = "Basic "+ [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($auth)) }
+          if ($env:SYSTEM_DEBUG -eq 'true') {
+            gci env:
+            git --no-pager config --list
+          }
 
           $repositoryUri = $Env:BUILD_REPOSITORY_URI
+          $authKeyName = "http.$repositoryUri.extraheader"
+          if ($env:SYSTEM_DEBUG -eq 'true') {
+            write-host "auth key name $authKeyName"
+          }
+          $authKey = git config --get $authKeyName
+          if ($env:SYSTEM_DEBUG -eq 'true') {
+            write-host "auth key $authKey"
+          }
 
           $uribuilder = [System.UriBuilder]$repositoryUri
           if ($uribuilder.Host -eq "github.com") {
@@ -75,11 +70,12 @@ stages:
           $uribase = $uribuilder.Scheme + "://" + $ghHost + "/api/v3/"
 
           $uri = $uribase + "repos" + $uribuilder.Path + "/releases"
+          $ghHeader = @{ Authorization = $authKey.split(':').trim()[1] }
 
           $body = @{
-            tag_name="v$env:PUBLISHMODULE_PACKAGEVERSION"
+            tag_name="v$env:VERSIONMODULE_PACKAGEVERSION"
             target_commitish= "$(Build.SourceVersion)"
-            name = "${{ parameters.ModuleName }} v$env:PUBLISHMODULE_PACKAGEVERSION"
+            name = "${{ parameters.ModuleName }} v$env:VERSIONMODULE_PACKAGEVERSION"
             } | ConvertTo-Json
           write-host $body
           ($release = Invoke-RestMethod -Uri $uri -Headers $ghHeader -Body $body -Method Post)
@@ -88,10 +84,32 @@ stages:
           ($asset = Invoke-RestMethod -Uri $uploadurl -Method Post -InFile '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip' -Headers $ghHeader -ContentType 'application/zip')
         displayName: Publish Release
         condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
+      - template: ../steps/deploy/register-psrepository-step.yml
+        parameters:
+          RepoPath: ${{ parameters.RepoPath }}
+          RepoName: ${{ parameters.RepoName }}
+      - powershell: |
+          if ($env:SYSTEM_DEBUG -eq 'true') {
+            Write-Host "$(Agent.TempDirectory)"
+            gci "$(Agent.TempDirectory)"
+          }
+          $module = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
+          foreach ($req in $module.RequiredModules) {
+            Save-Module -Name $req -Path $(Agent.TempDirectory)
+          }
+        displayName: Download Module Dependencies
+      - powershell: |
+          $env:PSModulePath = $env:PSModulePath + [System.IO.Path]::PathSeparator + "$(Agent.TempDirectory)"
+          if ($env:SYSTEM_DEBUG -eq 'true') {
+            gci "$(Agent.TempDirectory)"
+          }
+          Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*' -Repository '${{ parameters.RepoName }}' -Force
+        displayName: Publish Module
+        name: PublishModule
     - deployment: Test
       dependsOn: Publish
       variables:
-        PackageVersion: $[ dependencies.Publish.outputs['PublishModule.PackageVersion']]
+        PackageVersion: $[ dependencies.Publish.outputs['VersionModule.PackageVersion']]
       environment:
         name: Test
         resourceType: VirtualMachine
@@ -108,7 +126,7 @@ stages:
       condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
       dependsOn: Publish
       variables:
-        PackageVersion: $[ dependencies.Publish.outputs['PublishModule.PackageVersion']]
+        PackageVersion: $[ dependencies.Publish.outputs['VersionModule.PackageVersion']]
       environment:
         name: Production
         resourceType: VirtualMachine
