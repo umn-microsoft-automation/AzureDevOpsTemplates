@@ -39,7 +39,7 @@ jobs:
           exit 0
           ;;
         *)
-          exit $?
+          exit $MDLINT
           ;;
       esac
     #continueOnError: true
