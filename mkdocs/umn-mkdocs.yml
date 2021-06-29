@@ -29,15 +29,18 @@ jobs:
         ]
       }
       EOF
-      npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
+      sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
       markdownlint "docs/**/*.md"
       echo "return code"
       echo $?
       case $? in
         0 | 1)
           exit 0
+          ;;
         *)
           exit $?
+          ;;
+      esac
     #continueOnError: true
     displayName: Run Markdownlint
   # - script: |
