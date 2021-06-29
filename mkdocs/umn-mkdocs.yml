@@ -31,9 +31,10 @@ jobs:
       EOF
       sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
       markdownlint "docs/**/*.md"
+      MDLINT=$?
       echo "return code"
-      echo $?
-      case $? in
+      echo $MDLINT
+      case $MDLINT in
         0 | 1)
           exit 0
           ;;
