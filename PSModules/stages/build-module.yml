@@ -29,6 +29,8 @@ stages:
         - task: gitversion/execute@0
         - powershell: |
             gci env:
+          displayName: test environment
+          enabled: ${{ eq(variables['System.Debug'], 'True') }}
         - powershell: |
             # A valid Nuget version allows a hyphen in the prerelease string, and on a pull request build,
             # the gitversion generated nuget version will have a hyphen in the prerelease string (example: "1.2.8-pullrequest0003-0016")
