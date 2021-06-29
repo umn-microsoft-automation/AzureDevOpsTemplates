@@ -90,6 +90,7 @@ stages:
           $uribase = $uribuilder.Scheme + "://" + $ghHost + "/api/v3/"
 
           $uri = $uribase + "repos" + $uribuilder.Path + "/releases"
+          $ghHeader = @{ Authorization = $authKey.split(':').trim()[1] }
 
           $body = @{
             tag_name="v$env:PUBLISHMODULE_PACKAGEVERSION"
