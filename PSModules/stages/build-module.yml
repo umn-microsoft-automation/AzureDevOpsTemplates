@@ -7,6 +7,9 @@ stages:
   jobs:
     - job: Build
       steps:
+        - task: gitversion/setup@0
+          inputs:
+            versionSpec: '5.x'
         # https://github.com/PoshCode/Azure-Pipelines/blob/master/Install-RequiredModule-step.yml
         - powershell: |
             # Apparently, Install-Script isn't good enough except on Windows?
@@ -23,12 +26,11 @@ stages:
                 "mode: Mainline" | Set-Content '$(Build.SourcesDirectory)/GitVersion.yml'
             }
           displayName: Create gitversion.yml if none exists
-        - task: gitversion/setup@0
-          inputs:
-            versionSpec: '5.x'
         - task: gitversion/execute@0
         - powershell: |
             gci env:
+          displayName: test environment
+          enabled: ${{ eq(variables['System.Debug'], 'True') }}
         - powershell: |
             # A valid Nuget version allows a hyphen in the prerelease string, and on a pull request build,
             # the gitversion generated nuget version will have a hyphen in the prerelease string (example: "1.2.8-pullrequest0003-0016")

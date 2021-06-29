@@ -104,36 +104,3 @@ stages:
           Publish-Module -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*' -Repository '${{ parameters.RepoName }}' -Force
         displayName: Publish Module
         name: PublishModule
-    - deployment: Test
-      dependsOn: Publish
-      variables:
-        PackageVersion: $[ dependencies.Publish.outputs['VersionModule.PackageVersion']]
-      environment:
-        name: Test
-        resourceType: VirtualMachine
-      strategy:
-        rolling:
-          deploy:
-            steps:
-              - template: ../steps/deploy/deployment-job-steps.yml
-                parameters:
-                  RepoPath: ${{ parameters.RepoPath }}
-                  RepoName: ${{ parameters.RepoName }}
-                  ModuleName: ${{ parameters.ModuleName }}
-    - deployment: Production
-      condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
-      dependsOn: Publish
-      variables:
-        PackageVersion: $[ dependencies.Publish.outputs['VersionModule.PackageVersion']]
-      environment:
-        name: Production
-        resourceType: VirtualMachine
-      strategy:
-        rolling:
-          deploy:
-            steps:
-              - template: ../steps/deploy/deployment-job-steps.yml
-                parameters:
-                  RepoPath: ${{ parameters.RepoPath }}
-                  RepoName: ${{ parameters.RepoName }}
-                  ModuleName: ${{ parameters.ModuleName }}
