@@ -23,7 +23,7 @@ jobs:
   steps:
   - bash: exit 1
     displayName: Fail build if DocsPath is not set
-    condition: contains(parameters.DocsPath, 'DocsPath')
+    condition: ${{ contains(parameters.DocsPath, 'DocsPath') }}
   # - script: |
   #     sudo npm i -g markdownlint-cli
   #     markdownlint "**/*.md"
