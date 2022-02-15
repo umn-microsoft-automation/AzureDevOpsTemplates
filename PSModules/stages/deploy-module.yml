@@ -26,11 +26,11 @@ stages:
           artifactName: ${{ parameters.ModuleName }}
           targetPath: $(Build.ArtifactStagingDirectory)
       - powershell: |
-          $test = (Test-ModuleManifest -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
+          $test = (Import-PowerShellDataFile -Path '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}\*\${{ parameters.ModuleName }}.psd1')
           if ($test.PrivateData.PSData.Prerelease) {
-            $version = "$($test.version)-$($test.PrivateData.PSData.Prerelease)"
+            $version = "$($test.ModuleVersion)-$($test.PrivateData.PSData.Prerelease)"
           } else {
-            $version = $test.Version.ToString()
+            $version = $test.ModuleVersion
           }
           Write-Host "INFO [task.setvariable variable=PackageVersion;isOutput=true]$version"
           Write-Host "##vso[task.setvariable variable=PackageVersion;isOutput=true]$version"

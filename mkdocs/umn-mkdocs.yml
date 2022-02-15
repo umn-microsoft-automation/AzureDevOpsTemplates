@@ -22,6 +22,11 @@ jobs:
 - job: build
   steps:
   - bash: |
+      echo '$(Build.DefinitionName)'
+      echo '${{ parameters.DocsPath }}'
+      if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
+    displayName: Fail build if DocsPath is not set
+  - bash: |
       cat << EOF > .markdownlint-cli2.jsonc
       {
         "outputFormatters": [
@@ -48,6 +53,7 @@ jobs:
       esac
     #continueOnError: true
     displayName: Run Markdownlint
+
   # - script: |
   #     git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit "$(Agent.BuildDirectory)/markdownlint-cli"
   #     pushd "$(Agent.BuildDirectory)/markdownlint-cli"
@@ -63,7 +69,7 @@ jobs:
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - script: |
-      echo -e "FROM squidfunk/mkdocs-material \n RUN pip install mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin" | docker build -t squidfunk/mkdocs-material -
+      echo -e "FROM squidfunk/mkdocs-material \n RUN pip install mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin mkdocs-mermaid2-plugin" | docker build -t squidfunk/mkdocs-material -
       docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
