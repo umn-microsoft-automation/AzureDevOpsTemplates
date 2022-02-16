@@ -35,11 +35,12 @@ jobs:
       }
       EOF
 
-      sudo npm install markdownlint-cli2 -g
+      # sudo npm install markdownlint-cli2 -g
 
       git clone https://github.com/FISHMANPET/markdownlint-cli2.git --single-branch --branch path-resolve "$(Agent.BuildDirectory)/markdownlint-cli"
       pushd "$(Agent.BuildDirectory)/markdownlint-cli/formatter-junit"
-      npm install --loglevel verbose
+      sudo npm install -g
+
       popd
 
       pwd
