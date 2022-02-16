@@ -56,9 +56,10 @@ jobs:
       pwd
 
       cat .markdownlint-cli2.jsonc
-      ls
+      ls -a
+      ls -a /home/vsts/work/node_modules
       ls -al $(Common.TestResultsDirectory)
-      ls ./markdownlint-cli2
+      #ls ./markdownlint-cli2
       #sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
       # markdownlint-cli2 "docs/**/*.md"
       #node $(Agent.BuildDirectory)/markdownlint-cli/formatter-junit/node_modules/markdownlint-cli2/markdownlint-cli2.js "../../s/docs/**/*.md"
