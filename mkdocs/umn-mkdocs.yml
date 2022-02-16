@@ -30,7 +30,7 @@ jobs:
       cat << EOF > .markdownlint-cli2.jsonc
       {
         "outputFormatters": [
-          [ "markdownlint-cli2-formatter-junit", { "name": "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ]
+          [ "markdownlint-cli2-formatter-junit", { "name": "../$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ]
         ]
       }
       EOF
