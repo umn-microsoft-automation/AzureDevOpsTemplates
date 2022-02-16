@@ -50,7 +50,7 @@ jobs:
       ls -al $(Common.TestResultsDirectory)
       #sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
       # markdownlint-cli2 "docs/**/*.md"
-      node $(Agent.BuildDirectory)/markdownlint-cli/formatter-junit/node_modules/.bin/markdownlint-cli2.js "docs/**/*.md"
+      node $(Agent.BuildDirectory)/markdownlint-cli/formatter-junit/node_modules/markdownlint-cli2/markdownlint-cli2.js "docs/**/*.md"
       MDLINT=$?
       echo "return code"
       echo $MDLINT
