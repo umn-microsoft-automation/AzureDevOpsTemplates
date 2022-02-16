@@ -27,7 +27,20 @@ jobs:
       if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
     displayName: Fail build if DocsPath is not set
   - bash: |
-      cat << EOF > .markdownlint-cli2.jsonc
+      # cat << EOF > .markdownlint-cli2.jsonc
+      # {
+      #   "outputFormatters": [
+      #     [ "markdownlint-cli2-formatter-junit", { "name": "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ]
+      #   ]
+      # }
+      # EOF
+
+      sudo npm install markdownlint-cli2 -g
+
+      git clone https://github.com/FISHMANPET/markdownlint-cli2.git --single-branch --branch path-resolve "$(Agent.BuildDirectory)/markdownlint-cli"
+      pushd "$(Agent.BuildDirectory)/markdownlint-cli/formatter-junit"
+
+      cat << EOF > $(Agent.BuildDirectory)/markdownlint-cli/formatter-junit/.markdownlint-cli2.jsonc
       {
         "outputFormatters": [
           [ "markdownlint-cli2-formatter-junit", { "name": "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ]
@@ -35,10 +48,6 @@ jobs:
       }
       EOF
 
-      sudo npm install markdownlint-cli2 -g
-
-      git clone https://github.com/FISHMANPET/markdownlint-cli2.git --single-branch --branch path-resolve "$(Agent.BuildDirectory)/markdownlint-cli"
-      pushd "$(Agent.BuildDirectory)/markdownlint-cli/formatter-junit"
       npm install
       npm install markdownlint-cli2
       #popd
