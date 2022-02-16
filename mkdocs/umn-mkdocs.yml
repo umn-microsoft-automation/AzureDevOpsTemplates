@@ -48,8 +48,8 @@ jobs:
       # }
       # EOF
 
-      npm install ./markdownlint-cli2
-      npm install ./markdownlint-cli2/formatter-junit
+      npm install ./markdownlint-cli2 --loglevel verbose
+      npm install ./markdownlint-cli2/formatter-junit --loglevel verbose
       #npm install markdownlint-cli2
       #popd
 
