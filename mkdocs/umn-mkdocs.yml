@@ -40,15 +40,17 @@ jobs:
       git clone https://github.com/FISHMANPET/markdownlint-cli2.git --single-branch --branch path-resolve "$(Agent.BuildDirectory)/markdownlint-cli"
       pushd "$(Agent.BuildDirectory)/markdownlint-cli/formatter-junit"
       npm install
-
+      npm install markdownlint-cli2
       popd
 
       pwd
+
       cat .markdownlint-cli2.jsonc
       ls
       ls -al $(Common.TestResultsDirectory)
       #sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
-      markdownlint-cli2 "docs/**/*.md"
+      # markdownlint-cli2 "docs/**/*.md"
+      $(Agent.BuildDirectory)/markdownlint-cli/formatter-junit/node_modules/.bin/markdownlint-cli2 "docs/**/*.md"
       MDLINT=$?
       echo "return code"
       echo $MDLINT
