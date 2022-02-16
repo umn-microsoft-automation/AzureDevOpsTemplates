@@ -35,7 +35,7 @@ jobs:
       }
       EOF
 
-      sudo npm install markdownlint-cli2 -g --loglevel verbose
+      sudo npm install markdownlint-cli2 junit-report-builder@3.0.0 -g --loglevel verbose
 
       git clone https://github.com/FISHMANPET/markdownlint-cli2.git --single-branch --branch path-resolve "$(Agent.BuildDirectory)/markdownlint-cli"
       pushd "$(Agent.BuildDirectory)/markdownlint-cli/formatter-junit"
