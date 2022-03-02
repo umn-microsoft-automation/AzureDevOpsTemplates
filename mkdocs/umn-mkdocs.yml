@@ -47,7 +47,13 @@ jobs:
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - script: |
       echo -e "FROM squidfunk/mkdocs-material \n RUN pip install mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin mkdocs-mermaid2-plugin" | docker build -t squidfunk/mkdocs-material -
-      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
+      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build 2> stderr.txt
+      cat stderr.txt
+      echo "##[group]mkdocs build warnings"
+      while read p; do
+        echo "##[warning]$p"
+      done <stderr.txt
+      echo "##[endgroup]"
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
