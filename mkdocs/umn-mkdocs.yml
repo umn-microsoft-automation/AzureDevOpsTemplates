@@ -52,7 +52,7 @@ jobs:
       echo "##[group]mkdocs build warnings"
       while read p; do
         echo "##vso[task.logissue type=warning]$p"
-      done <stderr.txt
+      done <stderr.txt|sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g'
       echo "##[endgroup]"
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
