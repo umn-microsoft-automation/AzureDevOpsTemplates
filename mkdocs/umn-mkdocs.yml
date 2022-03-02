@@ -51,7 +51,7 @@ jobs:
       cat stderr.txt
       echo "##[group]mkdocs build warnings"
       while read p; do
-        echo "##[warning]$p"
+        echo "##vso[task.logissue type=warning]$p"
       done <stderr.txt
       echo "##[endgroup]"
     displayName: mkdocs-material build
