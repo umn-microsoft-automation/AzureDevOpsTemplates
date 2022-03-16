@@ -44,6 +44,7 @@ stages:
           archiveFile: '$(Build.ArtifactStagingDirectory)\${{ parameters.ModuleName }}.zip'
         condition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
       - powershell: |
+          [Net.ServicePointManager]::SecurityProtocol
           if ($env:SYSTEM_DEBUG -eq 'true') {
             gci env:
             git --no-pager config --list
