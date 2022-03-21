@@ -17,6 +17,7 @@ jobs:
   environment:
     name: ${{ parameters.Environment }}
     resourceType: VirtualMachine
+    tags: windows
   workspace:
     clean: all
   strategy:
