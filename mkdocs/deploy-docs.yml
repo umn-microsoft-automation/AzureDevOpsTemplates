@@ -15,7 +15,7 @@ jobs:
   condition: ${{ parameters.BuildCondition }}
   dependsOn: build
   environment:
-    name: ${{ parameters.Environment }}
+    name: ${{ parameters.Environment }}-windows
     resourceType: VirtualMachine
     tags: windows
   workspace:
@@ -42,7 +42,7 @@ jobs:
   condition: ${{ parameters.BuildCondition }}
   dependsOn: build
   environment:
-    name: ${{ parameters.Environment }}
+    name: ${{ parameters.Environment }}-linux
     resourceType: VirtualMachine
     tags: linux
   workspace:
