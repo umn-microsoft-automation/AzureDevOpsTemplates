@@ -62,6 +62,6 @@ jobs:
             inputs:
               SourceFolder: '$(Pipeline.Workspace)/${{ parameters.ArtifactName }}'
               Contents: '**'
-              TargetFolder: 'C:\inetpub\wwwroot\${{ parameters.DocsPath }}'
+              TargetFolder: '/var/www/html/${{ parameters.DocsPath }}'
               CleanTargetFolder: ${{ parameters.CleanDestination }}
               OverWrite: true
