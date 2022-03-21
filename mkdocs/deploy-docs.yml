@@ -11,7 +11,7 @@ parameters:
   type: string
 
 jobs:
-- deployment: ${{ parameters.Environment }}-windows
+- deployment: ${{ parameters.Environment }}_windows
   condition: ${{ parameters.BuildCondition }}
   dependsOn: build
   environment:
@@ -38,7 +38,7 @@ jobs:
               TargetFolder: 'C:\inetpub\wwwroot\${{ parameters.DocsPath }}'
               CleanTargetFolder: ${{ parameters.CleanDestination }}
               OverWrite: true
-- deployment: ${{ parameters.Environment }}-linux
+- deployment: ${{ parameters.Environment }}_linux
   condition: ${{ parameters.BuildCondition }}
   dependsOn: build
   environment:
