@@ -11,11 +11,11 @@ parameters:
   type: string
 
 jobs:
-- deployment: ${{ parameters.Environment }}
+- deployment: ${{ parameters.Environment }}-windows
   condition: ${{ parameters.BuildCondition }}
   dependsOn: build
   environment:
-    name: ${{ parameters.Environment }}-windows
+    name: ${{ parameters.Environment }}
     resourceType: VirtualMachine
     tags: windows
   workspace:
@@ -38,11 +38,11 @@ jobs:
               TargetFolder: 'C:\inetpub\wwwroot\${{ parameters.DocsPath }}'
               CleanTargetFolder: ${{ parameters.CleanDestination }}
               OverWrite: true
-- deployment: ${{ parameters.Environment }}
+- deployment: ${{ parameters.Environment }}-linux
   condition: ${{ parameters.BuildCondition }}
   dependsOn: build
   environment:
-    name: ${{ parameters.Environment }}-linux
+    name: ${{ parameters.Environment }}
     resourceType: VirtualMachine
     tags: linux
   workspace:
