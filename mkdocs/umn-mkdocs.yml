@@ -46,7 +46,7 @@ parameters:
 jobs:
 - job: build
   steps:
-  - ${{ if contains(parameters.testparam, 'DocsPath') }}:
+  - ${{ if contains(parameters.testparam, 'testparam') }}:
     - bash: |
         echo "True"
         echo '${{ parameters.testparam }}'
