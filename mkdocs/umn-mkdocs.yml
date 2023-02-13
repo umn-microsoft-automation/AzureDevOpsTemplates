@@ -2,6 +2,7 @@
 parameters:
 - name: DocsPath
   type: string
+  default: ''
 - name: CleanDestination
   type: boolean
   default: true
@@ -80,15 +81,18 @@ jobs:
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
-    artifact: $(templateArtifactName)
+    ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+      artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+    ${{ else }}:
+      artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
 - template: deploy-docs.yml
   parameters:
     ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
       DocsPath: ${{ variables['Build.DefinitionName'] }}
       ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     ${{ else }}:
-      DocsPath: ${{ parameters.DocsPath }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+      DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
     CleanDestination: ${{ parameters.CleanDestination }}
     Environment: Dev
     BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
@@ -98,8 +102,8 @@ jobs:
       DocsPath: ${{ variables['Build.DefinitionName'] }}
       ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     ${{ else }}:
-      DocsPath: ${{ parameters.DocsPath }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+      DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
     # DocsPath: $(templateDocsPath)
     CleanDestination: ${{ parameters.CleanDestination }}
     # ArtifactName: $(templateArtifactName)
@@ -111,8 +115,8 @@ jobs:
       DocsPath: ${{ variables['Build.DefinitionName'] }}
       ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     ${{ else }}:
-      DocsPath: ${{ parameters.DocsPath }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+      DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
     # DocsPath: $(templateDocsPath)
     CleanDestination: ${{ parameters.CleanDestination }}
     # ArtifactName: $(templateArtifactName)
