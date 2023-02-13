@@ -43,6 +43,8 @@ parameters:
 jobs:
 - job: build
   steps:
+  - powershell: |
+      gci env:
   - ${{ if contains(variables['DocsPath'], '$(DocsPath') }}:
     - bash: |
         echo "True"
