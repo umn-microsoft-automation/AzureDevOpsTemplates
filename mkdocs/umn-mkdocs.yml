@@ -61,7 +61,7 @@ jobs:
         echo "Else"
         echo '${{ variables['DocsPath'] }}'
         echo 'DocsPath'
-        echo '${{ contains(variables['DocsPath']h, 'DocsPath') }}'
+        echo '${{ contains(variables['DocsPath'], 'DocsPath') }}'
         echo "DocsPath: ${{ coalesce(variables['DocsPath'], variables['Build.DefinitionName']) }}"
         echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['DocsPath'], variables['Build.DefinitionName']) }}"
   - bash: |
