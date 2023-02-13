@@ -18,39 +18,44 @@ parameters:
   type: boolean
   default: false
 
-variables:
-  ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
-    templateDocsPath: ${{ variables['Build.DefinitionName'] }}
-  # - name: templateDocsPath
-  #   value: ${{ variables['Build.DefinitionName'] }}
-  #   readonly: true
-    templateArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-  # - name: templateArtifactName
-  #   value: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-  #   readonly: true
-  ${{ else }}:
-    templateDocsPath: ${{ parameters.DocsPath }}
-  # - name: templateDocsPath
-  #   value: ${{ parameters.DocsPath }}
-  #   readonly: true
-    templateArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
-  # - name: templateArtifactName
-  #   value: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
-  #   readonly: true
+# variables:
+#   ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+#     templateDocsPath: ${{ variables['Build.DefinitionName'] }}
+#   # - name: templateDocsPath
+#   #   value: ${{ variables['Build.DefinitionName'] }}
+#   #   readonly: true
+#     templateArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+#   # - name: templateArtifactName
+#   #   value: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+#   #   readonly: true
+#   ${{ else }}:
+#     templateDocsPath: ${{ parameters.DocsPath }}
+#   # - name: templateDocsPath
+#   #   value: ${{ parameters.DocsPath }}
+#   #   readonly: true
+#     templateArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+#   # - name: templateArtifactName
+#   #   value: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+#   #   readonly: true
 
 
 jobs:
 - job: build
   steps:
-  # - ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
-  #   -bash: |
-  #     echo '${{ variables['Build.DefinitionName'] }}'
-  # - bash: |
-  #     echo '${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}'
-  #     echo '$(Build.DefinitionName)'
-  #     echo '${{ parameters.DocsPath }}'
-  #     if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
-  #   displayName: Fail build if DocsPath is not set
+  - ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+    - bash: |
+        echo "##vso[task.setvariable variable=templateDocsPath;isreadonly=true]${{ variables['Build.DefinitionName'] }}"
+        echo "##vso[task.setvariable variable=templateArtifactName;isreadonly=true]${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+  - ${{ else }}:
+    - bash: |
+        echo "##vso[task.setvariable variable=templateDocsPath;isreadonly=true]${{ parameters.DocsPath }}"
+        echo "##vso[task.setvariable variable=templateArtifactName;isreadonly=true]${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
+  - bash: |
+      echo '${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}'
+      echo '$(Build.DefinitionName)'
+      echo '${{ parameters.DocsPath }}'
+      if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
+    displayName: Fail build if DocsPath is not set
   # - script: |
   #     sudo npm i -g markdownlint-cli
   #     markdownlint "**/*.md"
