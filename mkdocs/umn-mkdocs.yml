@@ -43,14 +43,16 @@ parameters:
 jobs:
 - job: build
   steps:
-  # - ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
-  #   - bash: |
-  #       echo "##vso[task.setvariable variable=templateDocsPath;isreadonly=true;isoutput=true]${{ variables['Build.DefinitionName'] }}"
-  #       echo "##vso[task.setvariable variable=templateArtifactName;isreadonly=true;isoutput=true]${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
-  # - ${{ else }}:
-  #   - bash: |
-  #       echo "##vso[task.setvariable variable=templateDocsPath;isreadonly=true;isoutput=true]${{ parameters.DocsPath }}"
-  #       echo "##vso[task.setvariable variable=templateArtifactName;isreadonly=true;isoutput=true]${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
+  - ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+    - bash: |
+        echo "True"
+        echo "DocsPath: ${{ variables['Build.DefinitionName'] }}"
+        echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+  - ${{ else }}:
+    - bash: |
+        echo "Else"
+        echo "DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}"
+        echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}"
   - bash: |
       echo '$(Build.DefinitionName)'
       echo '${{ parameters.DocsPath }}'
