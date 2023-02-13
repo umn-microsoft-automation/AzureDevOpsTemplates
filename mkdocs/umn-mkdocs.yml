@@ -18,27 +18,6 @@ parameters:
   type: boolean
   default: false
 
-# variables:
-#   ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
-#     templateDocsPath: ${{ variables['Build.DefinitionName'] }}
-#   # - name: templateDocsPath
-#   #   value: ${{ variables['Build.DefinitionName'] }}
-#   #   readonly: true
-#     templateArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-#   # - name: templateArtifactName
-#   #   value: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-#   #   readonly: true
-#   ${{ else }}:
-#     templateDocsPath: ${{ parameters.DocsPath }}
-#   # - name: templateDocsPath
-#   #   value: ${{ parameters.DocsPath }}
-#   #   readonly: true
-#     templateArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
-#   # - name: templateArtifactName
-#   #   value: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
-#   #   readonly: true
-
-
 jobs:
 - job: build
   steps:
