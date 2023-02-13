@@ -43,31 +43,31 @@ parameters:
 jobs:
 - job: build
   steps:
-  - ${{ if contains(parameters.DocsPath, '$(DocsPath') }}:
-    - bash: |
-        echo "True"
-        echo '${{ parameters.DocsPath }}'
-        echo '$(DocsPath'
-        echo '${{ contains(parameters.docspath, '$(DocsPath') }}'
-        echo '${{ contains('lpt-public', '$(DocsPath') }}'
-        echo '${{ contains('ABCDE', 'BCD') }}'
-        echo '${{ contains('ABCDE', 'ACE') }}'
-        echo "DocsPath: ${{ variables['Build.DefinitionName'] }}"
-        echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
-  - ${{ else }}:
-    - bash: |
-        echo "Else"
-        echo '${{ parameters.DocsPath }}'
-        echo 'DocsPath'
-        echo '${{ contains(parameters.DocsPath, 'DocsPath') }}'
-        echo "DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}"
-        echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}"
-  - bash: |
-      echo '$(Build.DefinitionName)'
-      echo '${{ parameters.DocsPath }}'
-      echo '${{ parameters.ArtifactName }}'
-      # if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
-    displayName: Fail build if DocsPath is not set
+  # - ${{ if contains(parameters.DocsPath, '$(DocsPath') }}:
+  #   - bash: |
+  #       echo "True"
+  #       echo '${{ parameters.DocsPath }}'
+  #       echo '$(DocsPath'
+  #       echo '${{ contains(parameters.docspath, '$(DocsPath') }}'
+  #       echo '${{ contains('lpt-public', '$(DocsPath') }}'
+  #       echo '${{ contains('ABCDE', 'BCD') }}'
+  #       echo '${{ contains('ABCDE', 'ACE') }}'
+  #       echo "DocsPath: ${{ variables['Build.DefinitionName'] }}"
+  #       echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+  # - ${{ else }}:
+  #   - bash: |
+  #       echo "Else"
+  #       echo '${{ parameters.DocsPath }}'
+  #       echo 'DocsPath'
+  #       echo '${{ contains(parameters.DocsPath, 'DocsPath') }}'
+  #       echo "DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}"
+  #       echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}"
+  # - bash: |
+  #     echo '$(Build.DefinitionName)'
+  #     echo '${{ parameters.DocsPath }}'
+  #     echo '${{ parameters.ArtifactName }}'
+  #     # if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
+  #   displayName: Fail build if DocsPath is not set
   # - script: |
   #     sudo npm i -g markdownlint-cli
   #     markdownlint "**/*.md"
@@ -92,44 +92,47 @@ jobs:
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
-    ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
-      artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-    ${{ else }}:
-      artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
+    artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+    # ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+    #   artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+    # ${{ else }}:
+    #   artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
 - template: deploy-docs.yml
   parameters:
-    ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
-      DocsPath: ${{ variables['Build.DefinitionName'] }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-    ${{ else }}:
-      DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
+    # ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+    #   DocsPath: ${{ variables['Build.DefinitionName'] }}
+    #   ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+    # ${{ else }}:
+    #   DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}
+    #   ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
+    DocsPath: ${{ variables['Build.DefinitionName'] }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     CleanDestination: ${{ parameters.CleanDestination }}
     Environment: Dev
     BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
-    ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
-      DocsPath: ${{ variables['Build.DefinitionName'] }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-    ${{ else }}:
-      DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
-    # DocsPath: $(templateDocsPath)
+    # ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+    #   DocsPath: ${{ variables['Build.DefinitionName'] }}
+    #   ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+    # ${{ else }}:
+    #   DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}
+    #   ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
+    DocsPath: ${{ variables['Build.DefinitionName'] }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    # ArtifactName: $(templateArtifactName)
     Environment: Tst
     BuildCondition: or(and(succeeded(), not(startsWith(variables['build.sourceBranchName'], 'dev')), eq(${{ parameters.DevDeploys }}, true)), and(succeeded(), eq(${{ parameters.DevDeploys }}, false)))
 - template: deploy-docs.yml
   parameters:
-    ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
-      DocsPath: ${{ variables['Build.DefinitionName'] }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-    ${{ else }}:
-      DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
-    # DocsPath: $(templateDocsPath)
+    # ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+    #   DocsPath: ${{ variables['Build.DefinitionName'] }}
+    #   ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+    # ${{ else }}:
+    #   DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}
+    #   ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
+    DocsPath: ${{ variables['Build.DefinitionName'] }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    # ArtifactName: $(templateArtifactName)
     Environment: Prd
     BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
