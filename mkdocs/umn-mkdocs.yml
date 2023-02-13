@@ -3,9 +3,6 @@ parameters:
 - name: DocsPath
   type: string
   default: ''
-- name: testparam
-  type: string
-  default: ''
 - name: CleanDestination
   type: boolean
   default: true
@@ -46,12 +43,12 @@ parameters:
 jobs:
 - job: build
   steps:
-  - ${{ if contains(variables.DocsPath, '$(DocsPath') }}:
+  - ${{ if contains(variables['DocsPath'], '$(DocsPath') }}:
     - bash: |
         echo "True"
-        echo '${{ variables.DocsPath }}'
+        echo '${{ variables['DocsPath'] }}'
         echo '$(DocsPath'
-        echo '${{ contains(variables.DocsPath, '$(DocsPath') }}'
+        echo '${{ contains(variables['DocsPath'], '$(DocsPath') }}'
         echo '${{ contains('lpt-public', '$(DocsPath') }}'
         echo '${{ contains('ABCDE', 'BCD') }}'
         echo '${{ contains('ABCDE', 'ACE') }}'
@@ -60,11 +57,11 @@ jobs:
   - ${{ else }}:
     - bash: |
         echo "Else"
-        echo '${{ variables.DocsPath }}'
+        echo '${{ variables['DocsPath'] }}'
         echo 'DocsPath'
-        echo '${{ contains(variables.DocsPath, 'DocsPath') }}'
-        echo "DocsPath: ${{ coalesce(variables.DocsPath, variables['Build.DefinitionName']) }}"
-        echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, variables.DocsPath, variables['Build.DefinitionName']) }}"
+        echo '${{ contains(variables['DocsPath']h, 'DocsPath') }}'
+        echo "DocsPath: ${{ coalesce(variables['DocsPath'], variables['Build.DefinitionName']) }}"
+        echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['DocsPath'], variables['Build.DefinitionName']) }}"
   - bash: |
       echo '$(Build.DefinitionName)'
       echo '${{ parameters.DocsPath }}'
