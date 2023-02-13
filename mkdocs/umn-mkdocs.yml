@@ -22,7 +22,7 @@ jobs:
 - job: build
   steps:
   - bash: |
-      echo '${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName'], 'string literal') }}'
+      echo '${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}'
       echo '$(Build.DefinitionName)'
       echo '${{ parameters.DocsPath }}'
       if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
@@ -51,25 +51,25 @@ jobs:
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
-    artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+    artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
     Environment: Dev
     BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
     Environment: Tst
     BuildCondition: or(and(succeeded(), not(startsWith(variables['build.sourceBranchName'], 'dev')), eq(${{ parameters.DevDeploys }}, true)), and(succeeded(), eq(${{ parameters.DevDeploys }}, false)))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ parameters.DocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
     Environment: Prd
     BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
