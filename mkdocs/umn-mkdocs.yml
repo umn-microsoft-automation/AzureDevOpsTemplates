@@ -85,10 +85,10 @@ jobs:
   parameters:
     ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
       DocsPath: ${{ variables['Build.DefinitionName'] }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     ${{ else }}:
-      DocsPath: ${{ parameters.DocsPath }}"
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
+      DocsPath: ${{ parameters.DocsPath }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     CleanDestination: ${{ parameters.CleanDestination }}
     Environment: Dev
     BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
@@ -96,10 +96,10 @@ jobs:
   parameters:
     ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
       DocsPath: ${{ variables['Build.DefinitionName'] }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     ${{ else }}:
-      DocsPath: ${{ parameters.DocsPath }}"
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
+      DocsPath: ${{ parameters.DocsPath }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     # DocsPath: $(templateDocsPath)
     CleanDestination: ${{ parameters.CleanDestination }}
     # ArtifactName: $(templateArtifactName)
@@ -109,10 +109,10 @@ jobs:
   parameters:
     ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
       DocsPath: ${{ variables['Build.DefinitionName'] }}
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     ${{ else }}:
-      DocsPath: ${{ parameters.DocsPath }}"
-      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
+      DocsPath: ${{ parameters.DocsPath }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
     # DocsPath: $(templateDocsPath)
     CleanDestination: ${{ parameters.CleanDestination }}
     # ArtifactName: $(templateArtifactName)
