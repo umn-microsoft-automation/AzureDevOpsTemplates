@@ -43,12 +43,12 @@ parameters:
 jobs:
 - job: build
   steps:
-  - ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+  - ${{ if contains(parameters.docspath, 'DocsPath') }}:
     - bash: |
         echo "True"
         echo '${{ parameters.DocsPath }}'
         echo 'DocsPath'
-        echo '${{ contains(parameters.DocsPath, 'DocsPath') }}'
+        echo '${{ contains(parameters.docspath, 'DocsPath') }}'
         echo '${{ contains('lpt-public', 'DocsPath') }}'
         echo '${{ contains('ABCDE', 'BCD') }}'
         echo '${{ contains('ABCDE', 'ACE') }}'
