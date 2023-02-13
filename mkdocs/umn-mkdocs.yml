@@ -46,11 +46,17 @@ jobs:
   - ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
     - bash: |
         echo "True"
+        echo '${{ parameters.DocsPath }}'
+        echo 'DocsPath'
+        echo '${{ contains(parameters.DocsPath, 'DocsPath') }}'
         echo "DocsPath: ${{ variables['Build.DefinitionName'] }}"
         echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
   - ${{ else }}:
     - bash: |
         echo "Else"
+        echo '${{ parameters.DocsPath }}'
+        echo 'DocsPath'
+        echo '${{ contains(parameters.DocsPath, 'DocsPath') }}'
         echo "DocsPath: ${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}"
         echo "ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}"
   - bash: |
