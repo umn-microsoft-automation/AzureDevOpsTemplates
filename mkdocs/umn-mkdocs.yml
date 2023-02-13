@@ -18,15 +18,35 @@ parameters:
   type: boolean
   default: false
 
+variables:
+  ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+    - name: templateDocsPath
+      value: ${{ variables['Build.DefinitionName'] }}
+      readonly: true
+    - name: templateArtifactName
+      value: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+      readonly: true
+  ${{ else }}:
+    - name: templateDocsPath
+      value: ${{ parameters.DocsPath }}
+      readonly: true
+    - name: templateArtifactName
+      value: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+      readonly: true
+
+
 jobs:
 - job: build
   steps:
-  - bash: |
-      echo '${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}'
-      echo '$(Build.DefinitionName)'
-      echo '${{ parameters.DocsPath }}'
-      if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
-    displayName: Fail build if DocsPath is not set
+  # - ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+  #   -bash: |
+  #     echo '${{ variables['Build.DefinitionName'] }}'
+  # - bash: |
+  #     echo '${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName']) }}'
+  #     echo '$(Build.DefinitionName)'
+  #     echo '${{ parameters.DocsPath }}'
+  #     if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
+  #   displayName: Fail build if DocsPath is not set
   # - script: |
   #     sudo npm i -g markdownlint-cli
   #     markdownlint "**/*.md"
@@ -51,25 +71,25 @@ jobs:
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
-    artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
+    artifact: ${{ variables.ArtifactName }}
 - template: deploy-docs.yml
   parameters:
-    DocsPath: ${{ parameters.DocsPath }}
+    DocsPath: ${{ variables.templateDocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
+    ArtifactName: ${{ variables.ArtifactName }}
     Environment: Dev
     BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
-    DocsPath: ${{ parameters.DocsPath }}
+    DocsPath: ${{ variables.templateDocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
+    ArtifactName: ${{ variables.ArtifactName }}
     Environment: Tst
     BuildCondition: or(and(succeeded(), not(startsWith(variables['build.sourceBranchName'], 'dev')), eq(${{ parameters.DevDeploys }}, true)), and(succeeded(), eq(${{ parameters.DevDeploys }}, false)))
 - template: deploy-docs.yml
   parameters:
-    DocsPath: ${{ parameters.DocsPath }}
+    DocsPath: ${{ variables.templateDocsPath }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath, variables['Build.DefinitionName']) }}
+    ArtifactName: ${{ variables.ArtifactName }}
     Environment: Prd
     BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
