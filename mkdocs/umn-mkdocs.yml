@@ -22,7 +22,7 @@ jobs:
 - job: build
   steps:
   - bash: |
-      echo '${{ coalesce(variables.DocsPath, variables.Build.DefinitionName) }}'
+      echo '${{ coalesce(parameters.DocsPath, variables['Build.DefinitionName'], 'string literal') }}'
       echo '$(Build.DefinitionName)'
       echo '${{ parameters.DocsPath }}'
       if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
