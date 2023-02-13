@@ -42,20 +42,20 @@ parameters:
 jobs:
 - job: build
   steps:
-  - ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
-    - bash: |
-        echo "##vso[task.setvariable variable=templateDocsPath;isreadonly=true]${{ variables['Build.DefinitionName'] }}"
-        echo "##vso[task.setvariable variable=templateArtifactName;isreadonly=true]${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
-  - ${{ else }}:
-    - bash: |
-        echo "##vso[task.setvariable variable=templateDocsPath;isreadonly=true]${{ parameters.DocsPath }}"
-        echo "##vso[task.setvariable variable=templateArtifactName;isreadonly=true]${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
-  - bash: |
-      echo '$(templateDocsPath)'
-      echo '$(templateArtifactName)'
-      # echo '${{ parameters.DocsPath }}'
-      # if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
-    displayName: Fail build if DocsPath is not set
+  # - ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+  #   - bash: |
+  #       echo "##vso[task.setvariable variable=templateDocsPath;isreadonly=true;isoutput=true]${{ variables['Build.DefinitionName'] }}"
+  #       echo "##vso[task.setvariable variable=templateArtifactName;isreadonly=true;isoutput=true]${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+  # - ${{ else }}:
+  #   - bash: |
+  #       echo "##vso[task.setvariable variable=templateDocsPath;isreadonly=true;isoutput=true]${{ parameters.DocsPath }}"
+  #       echo "##vso[task.setvariable variable=templateArtifactName;isreadonly=true;isoutput=true]${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
+  # - bash: |
+  #     echo '$(templateDocsPath)'
+  #     echo '$(templateArtifactName)'
+  #     # echo '${{ parameters.DocsPath }}'
+  #     # if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
+  #   displayName: Fail build if DocsPath is not set
   # - script: |
   #     sudo npm i -g markdownlint-cli
   #     markdownlint "**/*.md"
@@ -83,22 +83,38 @@ jobs:
     artifact: $(templateArtifactName)
 - template: deploy-docs.yml
   parameters:
-    DocsPath: $(templateDocsPath)
+    ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+      DocsPath: ${{ variables['Build.DefinitionName'] }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+    ${{ else }}:
+      DocsPath: ${{ parameters.DocsPath }}"
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: $(templateArtifactName)
     Environment: Dev
     BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
-    DocsPath: $(templateDocsPath)
+    ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+      DocsPath: ${{ variables['Build.DefinitionName'] }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+    ${{ else }}:
+      DocsPath: ${{ parameters.DocsPath }}"
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
+    # DocsPath: $(templateDocsPath)
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: $(templateArtifactName)
+    # ArtifactName: $(templateArtifactName)
     Environment: Tst
     BuildCondition: or(and(succeeded(), not(startsWith(variables['build.sourceBranchName'], 'dev')), eq(${{ parameters.DevDeploys }}, true)), and(succeeded(), eq(${{ parameters.DevDeploys }}, false)))
 - template: deploy-docs.yml
   parameters:
-    DocsPath: $(templateDocsPath)
+    ${{ if contains(parameters.DocsPath, 'DocsPath') }}:
+      DocsPath: ${{ variables['Build.DefinitionName'] }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}"
+    ${{ else }}:
+      DocsPath: ${{ parameters.DocsPath }}"
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}"
+    # DocsPath: $(templateDocsPath)
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: $(templateArtifactName)
+    # ArtifactName: $(templateArtifactName)
     Environment: Prd
     BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
