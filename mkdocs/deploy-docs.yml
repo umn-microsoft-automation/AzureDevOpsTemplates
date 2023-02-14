@@ -32,12 +32,19 @@ jobs:
               scriptType: bash
               scriptLocation: inlineScript
               failOnStandardError: true
+              addSpnToEnvironment: true
               inlineScript: |
                 export STORE_NAME="$(docs-storage-account)"
                 echo "Storage Account Name: $STORE_NAME"
                 export CONTAINER_NAME="${{ lower(parameters.Environment) }}-content"
                 echo "Container Name: $CONTAINER_NAME"
-                azcopy login status
+                export AZCOPY_AUTO_LOGIN_TYPE=SPN
+                export AZCOPY_SPA_APPLICATION_ID=$servicePrincipalId
+                export AZCOPY_SPA_CLIENT_SECRET=$servicePrincipalKey
+                export AZCOPY_TENANT_ID=$tenantId
+                # azcopy login status
+                # azcopy login --service-principal --application-id $servicePrincipalId
+                # azcopy login status
                 # EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
                 # && export SAS_TOKEN=$( az storage container generate-sas \
                 #     --account-name $STORE_NAME \
