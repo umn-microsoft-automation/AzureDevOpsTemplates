@@ -32,33 +32,33 @@ jobs:
               scriptType: bash
               scriptLocation: inlineScript
               failOnStandardError: true
-              addSpnToEnvironment: true
+              # addSpnToEnvironment: true
               inlineScript: |
                 export STORE_NAME="$(docs-storage-account)"
                 echo "Storage Account Name: $STORE_NAME"
                 export CONTAINER_NAME="${{ lower(parameters.Environment) }}-content"
                 echo "Container Name: $CONTAINER_NAME"
-                export AZCOPY_AUTO_LOGIN_TYPE=SPN
-                export AZCOPY_SPA_APPLICATION_ID=$servicePrincipalId
-                export AZCOPY_SPA_CLIENT_SECRET=$servicePrincipalKey
-                export AZCOPY_TENANT_ID=$tenantId
-                # azcopy login --service-principal --application-id $servicePrincipalId
-                # azcopy login status
-                # EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
-                # && export SAS_TOKEN=$( az storage container generate-sas \
-                #     --account-name $STORE_NAME \
-                #     --name $CONTAINER_NAME \
-                #     --expiry $EXPIRY \
-                #     --permissions acdlrw \
-                #     --auth-mode login \
-                #     --as-user \
-                #     --output tsv )
+                # export AZCOPY_AUTO_LOGIN_TYPE=SPN
+                # export AZCOPY_SPA_APPLICATION_ID=$servicePrincipalId
+                # export AZCOPY_SPA_CLIENT_SECRET=$servicePrincipalKey
+                # export AZCOPY_TENANT_ID=$tenantId
+                EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
+                && ACCOUNT_KEY=`az storage account keys list --account-name $STORE_NAME --query [1].value -o tsv`
+                && export SAS_TOKEN=$( az storage container generate-sas \
+                    --account-key $ACCOUNT_KEY
+                    --account-name $STORE_NAME \
+                    --name $CONTAINER_NAME \
+                    --expiry $EXPIRY \
+                    --permissions acdlrw \
+                    --auth-mode login \
+                    --as-user \
+                    --output tsv )
                 echo "$(Pipeline.Workspace)/${{ parameters.DocsPath }}"
                 # echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
-                echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/"
+                echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
                 azcopy sync \
                     "$(Pipeline.Workspace)/${{ parameters.DocsPath }}" \
-                    "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/" \
+                    "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}" \
                     --delete-destination=true
 
 # - deployment: ${{ parameters.Environment }}_windows
