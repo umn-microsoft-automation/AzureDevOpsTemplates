@@ -45,13 +45,13 @@ jobs:
                 EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
                 && ACCOUNT_KEY=`az storage account keys list --account-name $STORE_NAME --query [1].value -o tsv` \
                 && export SAS_TOKEN=$( az storage container generate-sas \
-                    --account-key $ACCOUNT_KEY
+                    --account-key $ACCOUNT_KEY \
                     --account-name $STORE_NAME \
                     --name $CONTAINER_NAME \
                     --expiry $EXPIRY \
                     --permissions acdlrw \
-                    --auth-mode login \
-                    --as-user \
+                    # --auth-mode login \
+                    # --as-user \
                     --output tsv )
                 echo "$(Pipeline.Workspace)/${{ parameters.DocsPath }}"
                 # echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
