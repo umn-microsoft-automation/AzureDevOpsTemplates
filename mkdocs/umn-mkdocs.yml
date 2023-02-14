@@ -31,35 +31,10 @@ jobs:
       }
       EOF
 
-      # sudo npm install markdownlint-cli2 install markdownlint-cli2-formatter-junit -g
-
-      # git clone https://github.com/FISHMANPET/markdownlint-cli2.git --single-branch --branch path-resolve # "$(Agent.BuildDirectory)/markdownlint-cli"
-      #pushd "$(Agent.BuildDirectory)/markdownlint-cli/formatter-junit"
-
-      # cat << EOF > $(Agent.BuildDirectory)/markdownlint-cli/formatter-junit/.markdownlint-cli2.jsonc
-      # {
-      #   "outputFormatters": [
-      #     [ "markdownlint-cli2-formatter-junit", { "name": "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ]
-      #   ]
-      # }
-      # EOF
-
-      # npm install ./markdownlint-cli2 --loglevel verbose
-      # npm install ./markdownlint-cli2/formatter-junit --loglevel verbose
-      #npm install markdownlint-cli2
-      #popd
-
-      # pwd
-
       cat .markdownlint-cli2.jsonc
-      # ls -a
-      # ls -a /home/vsts/work/node_modules
-      # ls -al $(Common.TestResultsDirectory)
-      #ls ./markdownlint-cli2
+
       sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
       markdownlint-cli2 "docs/**/*.md"
-      #node $(Agent.BuildDirectory)/markdownlint-cli/formatter-junit/node_modules/markdownlint-cli2/markdownlint-cli2.js "../../s/docs/**/*.md"
-      # /home/vsts/work/node_modules/.bin/markdownlint-cli2 "docs/**/*.md"
       MDLINT=$?
       echo "return code: $MDLINT"
       case $MDLINT in
@@ -70,17 +45,7 @@ jobs:
           exit $MDLINT
           ;;
       esac
-    #continueOnError: true
     displayName: Run Markdownlint
-
-  # - script: |
-  #     git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit "$(Agent.BuildDirectory)/markdownlint-cli"
-  #     pushd "$(Agent.BuildDirectory)/markdownlint-cli"
-  #     npm install
-  #     popd
-  #     node "$(Agent.BuildDirectory)/markdownlint-cli/markdownlint.js" -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "docs/**/*.md"
-  #   displayName: Markdown Lint
-  #   continueOnError: true
   - task: PublishTestResults@2
     displayName: Publish Test Results
     inputs:
