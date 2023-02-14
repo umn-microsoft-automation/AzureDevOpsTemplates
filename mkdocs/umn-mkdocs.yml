@@ -19,7 +19,6 @@ parameters:
   type: boolean
   default: false
 
-
 jobs:
 - job: build
   steps:
@@ -46,21 +45,21 @@ jobs:
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ variables['Build.DefinitionName'] }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     CleanDestination: ${{ parameters.CleanDestination }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     Environment: Dev
     BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ variables['Build.DefinitionName'] }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     CleanDestination: ${{ parameters.CleanDestination }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     Environment: Tst
     BuildCondition: or(and(succeeded(), not(startsWith(variables['build.sourceBranchName'], 'dev')), eq(${{ parameters.DevDeploys }}, true)), and(succeeded(), eq(${{ parameters.DevDeploys }}, false)))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ variables['Build.DefinitionName'] }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     CleanDestination: ${{ parameters.CleanDestination }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     Environment: Prd
     BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
