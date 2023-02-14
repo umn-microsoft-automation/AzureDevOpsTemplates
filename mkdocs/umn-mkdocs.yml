@@ -45,6 +45,12 @@ jobs:
       pip install mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
+  - bash: |
+      FILE=.htaccess
+      if test -f "$FILE"; then
+        cp $FILE $(Build.ArtifactStagingDirectory)/
+      fi
+    displayName: copy htaccess
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
 - template: deploy-docs.yml
