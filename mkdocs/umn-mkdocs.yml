@@ -22,6 +22,11 @@ parameters:
 jobs:
 - job: build
   steps:
+  # - script: |
+  #     sudo npm i -g markdownlint-cli
+  #     markdownlint "**/*.md"
+  #   continueOnError: true
+  #   displayName: Run Markdownlint
   - script: |
       git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit "$(Agent.BuildDirectory)/markdownlint-cli"
       pushd "$(Agent.BuildDirectory)/markdownlint-cli"
