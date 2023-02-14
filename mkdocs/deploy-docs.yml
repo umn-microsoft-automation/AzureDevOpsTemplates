@@ -10,9 +10,6 @@ parameters:
 - name: BuildCondition
   type: string
 
-variables:
-  group: docs-config
-
 jobs:
 - deployment: ${{ parameters.Environment }}_blob
   condition: ${{ parameters.BuildCondition }}
