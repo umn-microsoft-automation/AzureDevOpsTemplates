@@ -42,7 +42,7 @@ jobs:
                 export AZCOPY_SPA_APPLICATION_ID=$servicePrincipalId
                 export AZCOPY_SPA_CLIENT_SECRET=$servicePrincipalKey
                 export AZCOPY_TENANT_ID=$tenantId
-                # azcopy login status
+                azcopy login status
                 # azcopy login --service-principal --application-id $servicePrincipalId
                 # azcopy login status
                 # EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
@@ -56,11 +56,12 @@ jobs:
                 #     --output tsv )
                 echo "$(Pipeline.Workspace)/${{ parameters.DocsPath }}"
                 # echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
-                echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}"
+                echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/"
                 azcopy sync \
                     "$(Pipeline.Workspace)/${{ parameters.DocsPath }}" \
-                    "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}" \
+                    "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/" \
                     --delete-destination=true
+                azcopy login status
 
 # - deployment: ${{ parameters.Environment }}_windows
 #   condition: ${{ parameters.BuildCondition }}
