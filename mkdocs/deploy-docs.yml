@@ -43,7 +43,7 @@ jobs:
                 # export AZCOPY_SPA_CLIENT_SECRET=$servicePrincipalKey
                 # export AZCOPY_TENANT_ID=$tenantId
                 EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
-                && ACCOUNT_KEY=`az storage account keys list --account-name $STORE_NAME --query [1].value -o tsv`
+                && ACCOUNT_KEY=`az storage account keys list --account-name $STORE_NAME --query [1].value -o tsv` \
                 && export SAS_TOKEN=$( az storage container generate-sas \
                     --account-key $ACCOUNT_KEY
                     --account-name $STORE_NAME \
