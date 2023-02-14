@@ -2,6 +2,7 @@
 parameters:
 - name: DocsPath
   type: string
+  default: ''
 - name: CleanDestination
   type: boolean
   default: true
@@ -93,29 +94,29 @@ jobs:
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - script: |
-      echo -e "FROM squidfunk/mkdocs-material \n RUN pip install mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin mkdocs-mermaid2-plugin" | docker build -t squidfunk/mkdocs-material -
-      docker run --rm -v ${PWD}:/docs -v $(Build.ArtifactStagingDirectory):/docs/site squidfunk/mkdocs-material build
+      pip install mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
+      mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
-    artifact: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+    artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
 - template: deploy-docs.yml
   parameters:
-    DocsPath: ${{ parameters.DocsPath }}
+    DocsPath: ${{ variables['Build.DefinitionName'] }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     Environment: Dev
     BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
-    DocsPath: ${{ parameters.DocsPath }}
+    DocsPath: ${{ variables['Build.DefinitionName'] }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     Environment: Tst
     BuildCondition: or(and(succeeded(), not(startsWith(variables['build.sourceBranchName'], 'dev')), eq(${{ parameters.DevDeploys }}, true)), and(succeeded(), eq(${{ parameters.DevDeploys }}, false)))
 - template: deploy-docs.yml
   parameters:
-    DocsPath: ${{ parameters.DocsPath }}
+    DocsPath: ${{ variables['Build.DefinitionName'] }}
     CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, parameters.DocsPath) }}
+    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
     Environment: Prd
     BuildCondition: and(succeeded(), eq(variables['build.sourceBranchName'], '${{ parameters.DefaultBranch }}'))
