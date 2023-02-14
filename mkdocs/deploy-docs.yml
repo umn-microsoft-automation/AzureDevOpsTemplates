@@ -50,9 +50,10 @@ jobs:
                     --name $CONTAINER_NAME \
                     --expiry $EXPIRY \
                     --permissions acdlrw \
+                    --output tsv )
                     # --auth-mode login \
                     # --as-user \
-                    --output tsv )
+                    # --output tsv )
                 echo "$(Pipeline.Workspace)/${{ parameters.DocsPath }}"
                 # echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
                 echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
