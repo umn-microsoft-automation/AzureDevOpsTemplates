@@ -23,11 +23,6 @@ jobs:
 - job: build
   steps:
   - bash: |
-      echo '$(Build.DefinitionName)'
-      echo '${{ parameters.DocsPath }}'
-      if [[ '${{ parameters.DocsPath }}' == *"DocsPath"* ]]; then exit 1; fi;
-    displayName: Fail build if DocsPath is not set
-  - bash: |
       cat << EOF > .markdownlint-cli2.jsonc
       {
         "outputFormatters": [
@@ -36,9 +31,9 @@ jobs:
       }
       EOF
 
-      #sudo npm install markdownlint-cli2 -g
+      # sudo npm install markdownlint-cli2 install markdownlint-cli2-formatter-junit -g
 
-      git clone https://github.com/FISHMANPET/markdownlint-cli2.git --single-branch --branch path-resolve # "$(Agent.BuildDirectory)/markdownlint-cli"
+      # git clone https://github.com/FISHMANPET/markdownlint-cli2.git --single-branch --branch path-resolve # "$(Agent.BuildDirectory)/markdownlint-cli"
       #pushd "$(Agent.BuildDirectory)/markdownlint-cli/formatter-junit"
 
       # cat << EOF > $(Agent.BuildDirectory)/markdownlint-cli/formatter-junit/.markdownlint-cli2.jsonc
@@ -49,25 +44,24 @@ jobs:
       # }
       # EOF
 
-      npm install ./markdownlint-cli2 --loglevel verbose
-      npm install ./markdownlint-cli2/formatter-junit --loglevel verbose
+      # npm install ./markdownlint-cli2 --loglevel verbose
+      # npm install ./markdownlint-cli2/formatter-junit --loglevel verbose
       #npm install markdownlint-cli2
       #popd
 
-      pwd
+      # pwd
 
       cat .markdownlint-cli2.jsonc
-      ls -a
-      ls -a /home/vsts/work/node_modules
-      ls -al $(Common.TestResultsDirectory)
+      # ls -a
+      # ls -a /home/vsts/work/node_modules
+      # ls -al $(Common.TestResultsDirectory)
       #ls ./markdownlint-cli2
-      #sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
-      # markdownlint-cli2 "docs/**/*.md"
+      sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
+      markdownlint-cli2 "docs/**/*.md"
       #node $(Agent.BuildDirectory)/markdownlint-cli/formatter-junit/node_modules/markdownlint-cli2/markdownlint-cli2.js "../../s/docs/**/*.md"
-      /home/vsts/work/node_modules/.bin/markdownlint-cli2 "docs/**/*.md"
+      # /home/vsts/work/node_modules/.bin/markdownlint-cli2 "docs/**/*.md"
       MDLINT=$?
-      echo "return code"
-      echo $MDLINT
+      echo "return code: $MDLINT"
       case $MDLINT in
         0 | 1)
           exit 0
