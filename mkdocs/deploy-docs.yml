@@ -31,8 +31,9 @@ jobs:
               azureSubscription: docs-publish
               scriptType: bash
               scriptLocation: inlineScript
+              failOnStandardError: true
               inlineScript: |
-                export STORE_NAME="$(docs-storage-account)"
+                export STORE_NAME="$(docs-storage-account)89"
                 echo "Storage Account Name: $STORE_NAME"
                 export CONTAINER_NAME="${{ lower(parameters.Environment) }}-content"
                 echo "Container Name: $CONTAINER_NAME"
@@ -50,58 +51,58 @@ jobs:
                 #     "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}" \
                 #     --delete-destination=true
 
-- deployment: ${{ parameters.Environment }}_windows
-  condition: ${{ parameters.BuildCondition }}
-  dependsOn: build
-  environment:
-    name: ${{ parameters.Environment }}
-    resourceType: VirtualMachine
-    tags: windows
-  workspace:
-    clean: all
-  strategy:
-    rolling:
-      deploy:
-        steps:
-          #- ${{ if eq(parameters.CleanDestination, true) }}:
-          - task: DeleteFiles@1
-            inputs:
-              SourceFolder: $(Pipeline.Workspace)
-              Contents: ${{ parameters.ArtifactName }}
-          - download: current
-            artifact: ${{ parameters.ArtifactName }}
-          - task: CopyFiles@2
-            inputs:
-              SourceFolder: '$(Pipeline.Workspace)/${{ parameters.ArtifactName }}'
-              Contents: '**'
-              TargetFolder: 'C:\inetpub\wwwroot\${{ parameters.DocsPath }}'
-              CleanTargetFolder: ${{ parameters.CleanDestination }}
-              OverWrite: true
+# - deployment: ${{ parameters.Environment }}_windows
+#   condition: ${{ parameters.BuildCondition }}
+#   dependsOn: build
+#   environment:
+#     name: ${{ parameters.Environment }}
+#     resourceType: VirtualMachine
+#     tags: windows
+#   workspace:
+#     clean: all
+#   strategy:
+#     rolling:
+#       deploy:
+#         steps:
+#           #- ${{ if eq(parameters.CleanDestination, true) }}:
+#           - task: DeleteFiles@1
+#             inputs:
+#               SourceFolder: $(Pipeline.Workspace)
+#               Contents: ${{ parameters.ArtifactName }}
+#           - download: current
+#             artifact: ${{ parameters.ArtifactName }}
+#           - task: CopyFiles@2
+#             inputs:
+#               SourceFolder: '$(Pipeline.Workspace)/${{ parameters.ArtifactName }}'
+#               Contents: '**'
+#               TargetFolder: 'C:\inetpub\wwwroot\${{ parameters.DocsPath }}'
+#               CleanTargetFolder: ${{ parameters.CleanDestination }}
+#               OverWrite: true
 
-- deployment: ${{ parameters.Environment }}_linux
-  condition: ${{ parameters.BuildCondition }}
-  dependsOn: build
-  environment:
-    name: ${{ parameters.Environment }}
-    resourceType: VirtualMachine
-    tags: linux
-  workspace:
-    clean: all
-  strategy:
-    rolling:
-      deploy:
-        steps:
-          #- ${{ if eq(parameters.CleanDestination, true) }}:
-          - task: DeleteFiles@1
-            inputs:
-              SourceFolder: $(Pipeline.Workspace)
-              Contents: ${{ parameters.ArtifactName }}
-          - download: current
-            artifact: ${{ parameters.ArtifactName }}
-          - task: CopyFiles@2
-            inputs:
-              SourceFolder: '$(Pipeline.Workspace)/${{ parameters.ArtifactName }}'
-              Contents: '**'
-              TargetFolder: '/var/www/html/${{ parameters.DocsPath }}'
-              CleanTargetFolder: ${{ parameters.CleanDestination }}
-              OverWrite: true
+# - deployment: ${{ parameters.Environment }}_linux
+#   condition: ${{ parameters.BuildCondition }}
+#   dependsOn: build
+#   environment:
+#     name: ${{ parameters.Environment }}
+#     resourceType: VirtualMachine
+#     tags: linux
+#   workspace:
+#     clean: all
+#   strategy:
+#     rolling:
+#       deploy:
+#         steps:
+#           #- ${{ if eq(parameters.CleanDestination, true) }}:
+#           - task: DeleteFiles@1
+#             inputs:
+#               SourceFolder: $(Pipeline.Workspace)
+#               Contents: ${{ parameters.ArtifactName }}
+#           - download: current
+#             artifact: ${{ parameters.ArtifactName }}
+#           - task: CopyFiles@2
+#             inputs:
+#               SourceFolder: '$(Pipeline.Workspace)/${{ parameters.ArtifactName }}'
+#               Contents: '**'
+#               TargetFolder: '/var/www/html/${{ parameters.DocsPath }}'
+#               CleanTargetFolder: ${{ parameters.CleanDestination }}
+#               OverWrite: true
