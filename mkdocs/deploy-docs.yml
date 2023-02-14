@@ -37,20 +37,21 @@ jobs:
                 echo "Storage Account Name: $STORE_NAME"
                 export CONTAINER_NAME="${{ lower(parameters.Environment) }}-content"
                 echo "Container Name: $CONTAINER_NAME"
-                EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
-                && export SAS_TOKEN=$( az storage container generate-sas \
-                    --account-name $STORE_NAME \
-                    --name $CONTAINER_NAME \
-                    --expiry $EXPIRY \
-                    --permissions acdlrw \
-                    --auth-mode login \
-                    --as-user \
-                    --output tsv )
+                # EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
+                # && export SAS_TOKEN=$( az storage container generate-sas \
+                #     --account-name $STORE_NAME \
+                #     --name $CONTAINER_NAME \
+                #     --expiry $EXPIRY \
+                #     --permissions acdlrw \
+                #     --auth-mode login \
+                #     --as-user \
+                #     --output tsv )
                 echo "$(Pipeline.Workspace)/${{ parameters.DocsPath }}"
-                echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
+                # echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
+                echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}"
                 azcopy sync \
                     "$(Pipeline.Workspace)/${{ parameters.DocsPath }}" \
-                    "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}" \
+                    "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}" \
                     --delete-destination=true
 
 # - deployment: ${{ parameters.Environment }}_windows
