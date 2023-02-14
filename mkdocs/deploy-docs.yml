@@ -33,7 +33,7 @@ jobs:
               scriptLocation: inlineScript
               failOnStandardError: true
               inlineScript: |
-                export STORE_NAME="$(docs-storage-account)89"
+                export STORE_NAME="$(docs-storage-account)"
                 echo "Storage Account Name: $STORE_NAME"
                 export CONTAINER_NAME="${{ lower(parameters.Environment) }}-content"
                 echo "Container Name: $CONTAINER_NAME"
@@ -46,10 +46,10 @@ jobs:
                     --output tsv )
                 echo "$(Pipeline.Workspace)/${{ parameters.DocsPath }}"
                 echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
-                # azcopy sync \
-                #     "$(Pipeline.Workspace)/${{ parameters.DocsPath }}" \
-                #     "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}" \
-                #     --delete-destination=true
+                azcopy sync \
+                    "$(Pipeline.Workspace)/${{ parameters.DocsPath }}" \
+                    "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}" \
+                    --delete-destination=true
 
 # - deployment: ${{ parameters.Environment }}_windows
 #   condition: ${{ parameters.BuildCondition }}
