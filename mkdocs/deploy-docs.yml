@@ -37,6 +37,7 @@ jobs:
                 echo "Storage Account Name: $STORE_NAME"
                 export CONTAINER_NAME="${{ lower(parameters.Environment) }}-content"
                 echo "Container Name: $CONTAINER_NAME"
+                azcopy login status
                 # EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
                 # && export SAS_TOKEN=$( az storage container generate-sas \
                 #     --account-name $STORE_NAME \
