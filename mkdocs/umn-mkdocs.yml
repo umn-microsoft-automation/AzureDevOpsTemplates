@@ -55,8 +55,10 @@ jobs:
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - script: |
-      git clone --branch extends https://github.umn.edu/bajurny/mkdocs-material-umn.git
-      pip install ./mkdocs-material-umn
+      git config --global user.email "bajurny@umn.edu"
+      git config --global user.name "Peter Bajurny"
+      git clone https://github.umn.edu/bajurny/mkdocs-material-umn.git --single-branch --branch extends "$(Agent.BuildDirectory)/markdownlint-cli"
+      pip install "$(Agent.BuildDirectory)/markdownlint-cli"
       # pip install "mkdocs-material-umn @ git+https://github.umn.edu/bajurny/mkdocs-material-umn.git@extends"
       # pip install mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
       mkdocs build -d $(Build.ArtifactStagingDirectory)
