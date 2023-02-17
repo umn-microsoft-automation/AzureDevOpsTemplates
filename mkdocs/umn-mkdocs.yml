@@ -24,7 +24,7 @@ jobs:
   steps:
   - checkout: self
     persistCredentials: true
-  - checkout: bajurny/mkdocs-material-umn
+  - checkout: material_umn
   - bash: |
       cat << EOF > .markdownlint-cli2.jsonc
       {
