@@ -36,7 +36,7 @@ jobs:
       cat .markdownlint-cli2.jsonc
 
       sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
-      markdownlint-cli2 "docs/**/*.md"
+      markdownlint-cli2 "$(Pipeline.Workspace)/s/mkdocs-demo/docs/**/*.md"
       MDLINT=$?
       echo "return code: $MDLINT"
       case $MDLINT in
@@ -55,12 +55,13 @@ jobs:
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - script: |
-      git config --global user.email "bajurny@umn.edu"
-      git config --global user.name "Peter Bajurny"
-      git clone https://github.umn.edu/bajurny/mkdocs-material-umn.git --single-branch --branch extends "$(Agent.BuildDirectory)/markdownlint-cli"
-      pip install "$(Agent.BuildDirectory)/markdownlint-cli"
+      # git config --global user.email "bajurny@umn.edu"
+      # git config --global user.name "Peter Bajurny"
+      # git clone https://github.umn.edu/bajurny/mkdocs-material-umn.git --single-branch --branch extends "$(Agent.BuildDirectory)/markdownlint-cli"
+      pip install $(Pipeline.Workspace)/s/mkdocs-material-umn
       # pip install "mkdocs-material-umn @ git+https://github.umn.edu/bajurny/mkdocs-material-umn.git@extends"
       # pip install mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
+      cd $(Pipeline.Workspace)/s/mkdocs-demo
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
