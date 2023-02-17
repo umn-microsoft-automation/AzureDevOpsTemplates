@@ -22,6 +22,8 @@ parameters:
 jobs:
 - job: build
   steps:
+  - checkout: self
+    persistCredentials: true
   - bash: |
       cat << EOF > .markdownlint-cli2.jsonc
       {
@@ -53,7 +55,8 @@ jobs:
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - script: |
-      pip install mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
+      pip install "mkdocs-material-umn @ git+https://github.umn.edu/bajurny/mkdocs-material-umn.git@extends"
+      # pip install mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
