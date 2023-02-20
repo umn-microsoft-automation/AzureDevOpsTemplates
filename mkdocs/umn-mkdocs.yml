@@ -57,7 +57,7 @@ jobs:
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - task: PipAuthenticate@1
     inputs:
-      artifactFeeds: 'OIT Docs/mkdocs-material-umn'
+      artifactFeeds: $(docs-theme-feed)
       onlyAddExtraIndex: true
   - script: |
       # git config --global user.email "bajurny@umn.edu"
@@ -65,9 +65,9 @@ jobs:
       # git clone https://github.umn.edu/bajurny/mkdocs-material-umn.git --single-branch --branch extends "$(Agent.BuildDirectory)/markdownlint-cli"
       # pip install $(Pipeline.Workspace)/s/mkdocs-material-umn
       # pip install "mkdocs-material-umn @ git+https://github.umn.edu/bajurny/mkdocs-material-umn.git@extends"
-      # pip install mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
+      pip install $(docs-theme-package) mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
       # cd $(Pipeline.Workspace)/s/mkdocs-demo
-      pip install mkdocs-material-umn
+      # pip install mkdocs-material-umn
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
