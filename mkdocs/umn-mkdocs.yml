@@ -52,8 +52,12 @@ jobs:
       testResultsFormat: JUnit
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
+  - task: PipAuthenticate@1
+    inputs:
+      artifactFeeds: '$(System.TeamProject)/mkdocs-material-umn'
+      onlyAddExtraIndex: true
   - script: |
-      pip install mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
+      pip install mkdocs-material-umn mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
