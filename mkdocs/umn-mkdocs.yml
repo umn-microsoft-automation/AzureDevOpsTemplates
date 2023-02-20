@@ -22,9 +22,6 @@ parameters:
 jobs:
 - job: build
   steps:
-  # - checkout: self
-  #   persistCredentials: true
-  # - checkout: material_umn
   - bash: |
       cat << EOF > .markdownlint-cli2.jsonc
       {
@@ -60,14 +57,7 @@ jobs:
       artifactFeeds: $(docs-theme-feed)
       onlyAddExtraIndex: true
   - script: |
-      # git config --global user.email "bajurny@umn.edu"
-      # git config --global user.name "Peter Bajurny"
-      # git clone https://github.umn.edu/bajurny/mkdocs-material-umn.git --single-branch --branch extends "$(Agent.BuildDirectory)/markdownlint-cli"
-      # pip install $(Pipeline.Workspace)/s/mkdocs-material-umn
-      # pip install "mkdocs-material-umn @ git+https://github.umn.edu/bajurny/mkdocs-material-umn.git@extends"
-      pip install $(docs-theme-package) mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
-      # cd $(Pipeline.Workspace)/s/mkdocs-demo
-      # pip install mkdocs-material-umn
+      pip install $(docs-theme-package) mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - publish: $(Build.ArtifactStagingDirectory)
