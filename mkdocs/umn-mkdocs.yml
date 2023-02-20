@@ -58,6 +58,7 @@ jobs:
   - task: PipAuthenticate@1
     inputs:
       artifactFeeds: 'OIT Docs/mkdocs-material-umn'
+      onlyAddExtraIndex: true
   - script: |
       # git config --global user.email "bajurny@umn.edu"
       # git config --global user.name "Peter Bajurny"
