@@ -22,27 +22,42 @@ parameters:
 jobs:
 - job: build
   steps:
-  # - script: |
-  #     sudo npm i -g markdownlint-cli
-  #     markdownlint "**/*.md"
-  #   continueOnError: true
-  #   displayName: Run Markdownlint
-  - script: |
-      git clone https://github.com/FISHMANPET/markdownlint-cli.git --single-branch --branch junit "$(Agent.BuildDirectory)/markdownlint-cli"
-      pushd "$(Agent.BuildDirectory)/markdownlint-cli"
-      npm install
-      popd
-      node "$(Agent.BuildDirectory)/markdownlint-cli/markdownlint.js" -j "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" "docs/**/*.md"
-    displayName: Markdown Lint
-    continueOnError: true
+  - bash: |
+      cat << EOF > .markdownlint-cli2.jsonc
+      {
+        "outputFormatters": [
+          [ "markdownlint-cli2-formatter-junit", { "name": "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ]
+        ]
+      }
+      EOF
+
+      cat .markdownlint-cli2.jsonc
+
+      sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
+      markdownlint-cli2 "docs/**/*.md"
+      MDLINT=$?
+      echo "return code: $MDLINT"
+      case $MDLINT in
+        0 | 1)
+          exit 0
+          ;;
+        *)
+          exit $MDLINT
+          ;;
+      esac
+    displayName: Run Markdownlint
   - task: PublishTestResults@2
     displayName: Publish Test Results
     inputs:
       testResultsFormat: JUnit
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
+  - task: PipAuthenticate@1
+    inputs:
+      artifactFeeds: '$(System.TeamProject)/mkdocs-material-umn'
+      onlyAddExtraIndex: true
   - script: |
-      pip install mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
+      pip install mkdocs-material-umn mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
       mkdocs build -d $(Build.ArtifactStagingDirectory)
     displayName: mkdocs-material build
   - bash: |
