@@ -69,7 +69,7 @@ jobs:
       displayName: mkdocs-material build
   - ${{ elseif eq(parameters.BuildEngine, 'hugo') }}:
     - script: |
-        wget https://github.com/gohugoio/hugo/releases/download/v0.111.1/hugo_0.111.1_linux-arm64.deb
+        wget https://github.com/gohugoio/hugo/releases/download/v0.111.1/hugo_extended_0.111.1_linux-amd64.deb
         ls
         sudo dpkg -i hugo*.deb
       displayName: Install Hugo
