@@ -37,10 +37,22 @@ jobs:
       }
       EOF
 
+      if [ ${{ parameters.BuildEngine }} == 'mkdocs' ]
+      then
+        DOCSOURCE='docs'
+      elif [ ${{ parameters.BuildEngine }} == 'hugo' ]
+      then
+        DOCSOURCE='content'
+      else
+       echo failure
+       exit 1
+      fi
+      echo $DOCSOURCE
+
       cat .markdownlint-cli2.jsonc
 
       sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
-      markdownlint-cli2 "docs/**/*.md"
+      markdownlint-cli2 "$DOCSOURCE/**/*.md"
       MDLINT=$?
       echo "return code: $MDLINT"
       case $MDLINT in
