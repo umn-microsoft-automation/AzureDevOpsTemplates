@@ -71,7 +71,7 @@ jobs:
     - script: |
         wget https://github.com/gohugoio/hugo/releases/download/v0.111.1/hugo_0.111.1_linux-arm64.deb
         ls
-        sudo dpkig -i hugo*.deb
+        sudo dpkg -i hugo*.deb
       displayName: Install Hugo
     - script: |
         hugo --destination $(Build.ArtifactStagingDirectory)
