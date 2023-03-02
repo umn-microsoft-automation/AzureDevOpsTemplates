@@ -18,6 +18,12 @@ parameters:
 - name: DevDeploys
   type: boolean
   default: false
+- name: BuildEngine
+  type: string
+  default: mkdocs
+  values:
+  - mkdocs
+  - hugo
 
 jobs:
 - job: build
@@ -52,14 +58,24 @@ jobs:
       testResultsFormat: JUnit
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
-  - task: PipAuthenticate@1
-    inputs:
-      artifactFeeds: '$(System.TeamProject)/mkdocs-material-umn'
-      onlyAddExtraIndex: true
-  - script: |
-      pip install mkdocs-material-umn mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
-      mkdocs build -d $(Build.ArtifactStagingDirectory)
-    displayName: mkdocs-material build
+  - ${{ if eq(parameters.BuildEngine, 'mkdocs') }}:
+    - task: PipAuthenticate@1
+      inputs:
+        artifactFeeds: '$(System.TeamProject)/mkdocs-material-umn'
+        onlyAddExtraIndex: true
+    - script: |
+        pip install mkdocs-material-umn mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
+        mkdocs build -d $(Build.ArtifactStagingDirectory)
+      displayName: mkdocs-material build
+  - ${{ elseif eq(parameters.BuildEngine, 'hugo') }}:
+    - script: |
+        wget https://github.com/gohugoio/hugo/releases/download/v0.111.1/hugo_0.111.1_linux-arm64.deb
+        ls
+        sudo dpkig -i hugo*.deb
+      displayName: Install Hugo
+    - script: |
+        hugo --destination $(Build.ArtifactStagingDirectory)
+      displayName: hugo build
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
 - template: deploy-docs.yml
