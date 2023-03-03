@@ -71,32 +71,19 @@ jobs:
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
   - ${{ if eq(parameters.BuildEngine, 'mkdocs') }}:
-    - task: PipAuthenticate@1
-      inputs:
-        artifactFeeds: '$(System.TeamProject)/mkdocs-material-umn'
-        onlyAddExtraIndex: true
-    - script: |
-        pip install mkdocs-material-umn mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
-        mkdocs build -d $(Build.ArtifactStagingDirectory)
-      displayName: mkdocs-material build
+    - template: build-mkdocs.yml
   - ${{ elseif eq(parameters.BuildEngine, 'hugo') }}:
-    - script: |
-        wget https://github.com/gohugoio/hugo/releases/download/v0.111.1/hugo_extended_0.111.1_linux-amd64.deb
-        ls
-        sudo dpkg -i hugo*.deb
-      displayName: Install Hugo
-    - script: |
-        hugo --destination $(Build.ArtifactStagingDirectory)
-      displayName: hugo build
+    - template: build-hugo.yml
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-- template: deploy-docs.yml
-  parameters:
-    DocsPath: ${{ variables['Build.DefinitionName'] }}
-    CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-    Environment: Dev
-    BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
+- ${{ if parameters.DevDeploys }}:
+  - template: deploy-docs.yml
+    parameters:
+      DocsPath: ${{ variables['Build.DefinitionName'] }}
+      CleanDestination: ${{ parameters.CleanDestination }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+      Environment: Dev
+      BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ variables['Build.DefinitionName'] }}
