@@ -15,7 +15,7 @@ steps:
             release = json.load(response)
 
         assets = release['assets']
-        asset = next((a for a in assets if re.match(name_regex, a['name'])), None)
+        asset = next((a for a in assets if re.match(name_regex, a['name'])))
 
         with urllib.request.urlopen(asset['browser_download_url']) as response:
             with open(os.path.join('$(Pipeline.Workspace)', asset['name']) , 'wb') as file:
