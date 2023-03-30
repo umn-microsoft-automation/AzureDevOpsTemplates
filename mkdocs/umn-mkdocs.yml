@@ -18,6 +18,12 @@ parameters:
 - name: DevDeploys
   type: boolean
   default: false
+- name: BuildEngine
+  type: string
+  default: mkdocs
+  values:
+  - mkdocs
+  - hugo
 
 jobs:
 - job: build
@@ -26,15 +32,28 @@ jobs:
       cat << EOF > .markdownlint-cli2.jsonc
       {
         "outputFormatters": [
-          [ "markdownlint-cli2-formatter-junit", { "name": "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ]
+          [ "markdownlint-cli2-formatter-junit", { "name": "$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml" } ],
+          [ "markdownlint-cli2-formatter-default" ]
         ]
       }
       EOF
 
+      if [ ${{ parameters.BuildEngine }} == 'mkdocs' ]
+      then
+        DOCSOURCE='docs'
+      elif [ ${{ parameters.BuildEngine }} == 'hugo' ]
+      then
+        DOCSOURCE='content'
+      else
+       echo failure
+       exit 1
+      fi
+      echo $DOCSOURCE
+
       cat .markdownlint-cli2.jsonc
 
       sudo npm install markdownlint-cli2 markdownlint-cli2-formatter-junit -g
-      markdownlint-cli2 "docs/**/*.md"
+      markdownlint-cli2 "$DOCSOURCE/**/*.md"
       MDLINT=$?
       echo "return code: $MDLINT"
       case $MDLINT in
@@ -52,14 +71,10 @@ jobs:
       testResultsFormat: JUnit
       testResultsFiles: '$(Common.TestResultsDirectory)/Test-$(Build.SourceVersion).xml'
       failTaskOnFailedTests: ${{ parameters.FailOnTestFailure }}
-  - task: PipAuthenticate@1
-    inputs:
-      artifactFeeds: '$(System.TeamProject)/mkdocs-material-umn'
-      onlyAddExtraIndex: true
-  - script: |
-      pip install mkdocs-material-umn mkdocs-material mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin mkdocs-markdownextradata-plugin
-      mkdocs build -d $(Build.ArtifactStagingDirectory)
-    displayName: mkdocs-material build
+  - ${{ if eq(parameters.BuildEngine, 'mkdocs') }}:
+    - template: build-mkdocs.yml
+  - ${{ elseif eq(parameters.BuildEngine, 'hugo') }}:
+    - template: build-hugo.yml
   - bash: |
       FILE=.htaccess
       if test -f "$FILE"; then
@@ -68,13 +83,14 @@ jobs:
     displayName: copy htaccess
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-- template: deploy-docs.yml
-  parameters:
-    DocsPath: ${{ variables['Build.DefinitionName'] }}
-    CleanDestination: ${{ parameters.CleanDestination }}
-    ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
-    Environment: Dev
-    BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
+- ${{ if parameters.DevDeploys }}:
+  - template: deploy-docs.yml
+    parameters:
+      DocsPath: ${{ variables['Build.DefinitionName'] }}
+      CleanDestination: ${{ parameters.CleanDestination }}
+      ArtifactName: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
+      Environment: Dev
+      BuildCondition: and(succeeded(), eq(${{ parameters.DevDeploys }}, true), startsWith(variables['build.sourceBranchName'], 'dev'))
 - template: deploy-docs.yml
   parameters:
     DocsPath: ${{ variables['Build.DefinitionName'] }}

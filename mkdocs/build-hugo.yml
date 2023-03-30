@@ -1,0 +1,30 @@
+steps:
+  - task: PythonScript@0
+    inputs:
+      scriptSource: inline
+      script: |
+        import urllib.request
+        import json
+        import re
+        import os
+
+        hugo_url = 'https://api.github.com/repos/gohugoio/hugo/releases/latest'
+        name_regex = r'hugo_extended.*linux-amd64.deb'
+
+        with urllib.request.urlopen(hugo_url) as response:
+            release = json.load(response)
+
+        assets = release['assets']
+        asset = next((a for a in assets if re.match(name_regex, a['name'])))
+
+        with urllib.request.urlopen(asset['browser_download_url']) as response:
+            with open(os.path.join('$(Pipeline.Workspace)', asset['name']) , 'wb') as file:
+                file.write(response.read())
+    displayName: Download Hugo
+  - script: |
+      ls $(Pipeline.Workspace)
+      sudo dpkg -i $(Pipeline.Workspace)/hugo*.deb
+    displayName: Install Hugo
+  - script: |
+      hugo --destination $(Build.ArtifactStagingDirectory)
+    displayName: hugo build
