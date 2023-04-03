@@ -87,7 +87,7 @@ jobs:
         $graphToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.microsoft.com").AccessToken
         Connect-MgGraph -AccessToken $graphToken
 
-        $auth = ${{ parameters.AuthSetting }}
+        $auth = "${{ parameters.AuthSetting }}"
         # $auth = "valid-user"
 
         switch ($auth) {
