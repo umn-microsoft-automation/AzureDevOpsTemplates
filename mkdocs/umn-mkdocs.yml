@@ -99,7 +99,7 @@ jobs:
             }
             default {
                 $aadGroup = Get-MgGroup -Filter "DisplayName eq '$auth'"
-                if -not $aadGroup {
+                if (-not $aadGroup) {
                     throw "Group not found"
                 }
                 $servicePrincipalId = 'd23effd1-8b94-4b9c-85fb-a0a799d7ae50'
