@@ -84,8 +84,9 @@ jobs:
       ScriptType: 'InlineScript'
       Inline: |
         $context = Get-AzContext
-        $graphToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.microsoft.com").AccessToken
-        Connect-MgGraph -AccessToken $graphToken
+        $graphToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.microsoft.com")
+        write-host $graphToken
+        Connect-MgGraph -AccessToken $graphToken.AccessToken
 
         $auth = "${{ parameters.AuthSetting }}"
         # $auth = "valid-user"
