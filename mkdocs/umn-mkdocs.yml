@@ -98,13 +98,18 @@ jobs:
                 $output = "OIDCUnAuthAction pass"
             }
             default {
-                $aadGroup = Get-AzADGroup -DisplayName $auth
+                $aadGroup = Get-MgGroup -Filter "DisplayName eq '$auth'"
+                if -not $aadGroup {
+                    throw "Group not found"
+                }
                 $servicePrincipalId = 'd23effd1-8b94-4b9c-85fb-a0a799d7ae50'
                 $assignments = Get-MgServicePrincipalAppRoleAssignedTo -ServicePrincipalId $servicePrincipalId
                 if ($aadGroup.Id -in $assignments.principalId) {
                     $output = "Require claim `"groups~$($aadGroup.Id)`""
                 }
-                throw "Group not Valid"
+                else {
+                    throw "Group not Valid"
+                }
             }
         }
         Write-Host $output
