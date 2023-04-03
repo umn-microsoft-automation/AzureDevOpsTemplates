@@ -24,6 +24,9 @@ parameters:
   values:
   - mkdocs
   - hugo
+- name: AuthSetting
+  type: string
+  default: valid-user
 
 jobs:
 - job: build
@@ -75,12 +78,46 @@ jobs:
     - template: build-mkdocs.yml
   - ${{ elseif eq(parameters.BuildEngine, 'hugo') }}:
     - template: build-hugo.yml
-  - bash: |
-      FILE=.htaccess
-      if test -f "$FILE"; then
-        cp $FILE $(Build.ArtifactStagingDirectory)/
-      fi
-    displayName: copy htaccess
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: 'docs-publish'
+      ScriptType: 'InlineScript'
+      Inline: |
+        $context = Get-AzContext
+        $graphToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.microsoft.com").AccessToken
+        Connect-MgGraph -AccessToken $graphToken
+
+        $auth = ${{ parameters.AuthSetting }}
+        # $auth = "valid-user"
+
+        switch ($auth) {
+            "valid-user" {
+                $output = "Require valid-user"
+            }
+            "pass" {
+                $output = "OIDCUnAuthAction pass"
+            }
+            default {
+                $aadGroup = Get-AzADGroup -DisplayName $auth
+                $servicePrincipalId = 'd23effd1-8b94-4b9c-85fb-a0a799d7ae50'
+                $assignments = Get-MgServicePrincipalAppRoleAssignedTo -ServicePrincipalId $servicePrincipalId
+                if ($aadGroup.Id -in $assignments.principalId) {
+                    $output = "Require claim `"groups~$($aadGroup.Id)`""
+                }
+                throw "Group not Valid"
+            }
+        }
+        Write-Host $output
+        $output | Out-File "$(Build.ArtifactStagingDirectory)/.htaccess"
+        azurePowerShellVersion: 'LatestVersion'
+    displayName: Create htaccess
+
+  # - bash: |
+  #     FILE=.htaccess
+  #     if test -f "$FILE"; then
+  #       cp $FILE $(Build.ArtifactStagingDirectory)/
+  #     fi
+  #   displayName: copy htaccess
   - publish: $(Build.ArtifactStagingDirectory)
     artifact: ${{ coalesce(parameters.ArtifactName, variables['Build.DefinitionName']) }}
 - ${{ if parameters.DevDeploys }}:
