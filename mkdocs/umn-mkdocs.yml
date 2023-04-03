@@ -86,6 +86,8 @@ jobs:
         $context = Get-AzContext
         $graphToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.microsoft.com")
         write-host $graphToken
+        $graphToken | fl | out-string
+        $graphtoken | fl | out-string | write-host
         Connect-MgGraph -AccessToken $graphToken.AccessToken
 
         $auth = "${{ parameters.AuthSetting }}"
