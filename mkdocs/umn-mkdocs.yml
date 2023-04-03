@@ -83,8 +83,6 @@ jobs:
       azureSubscription: 'docs-publish'
       ScriptType: 'InlineScript'
       Inline: |
-
-
         $auth = "${{ parameters.AuthSetting }}"
         # $auth = "valid-user"
 
