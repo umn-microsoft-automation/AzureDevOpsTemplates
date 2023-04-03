@@ -98,6 +98,7 @@ jobs:
                 Connect-MgGraph -AccessToken $graphToken
                 $aadGroup = Get-MgGroup -Filter "DisplayName eq '$auth'"
                 if (-not $aadGroup) {
+                    Write-Host "##vso[task.logissue type=error]The group $auth could not be found, verify you have specified the correct group name in your azure-pipelines.yml file."
                     throw "Group not found"
                 }
                 $servicePrincipalId = 'd23effd1-8b94-4b9c-85fb-a0a799d7ae50'
@@ -106,6 +107,7 @@ jobs:
                     $output = "Require claim `"groups~$($aadGroup.Id)`""
                 }
                 else {
+                    Write-Host "##vso[task.logissue type=error]The group $auth is not registered for this application, verify you have specified the correct group name in your azure-pipelines.yml file, and verify with SRE that they have registered the group correctly."
                     throw "Group not Valid"
                 }
             }
