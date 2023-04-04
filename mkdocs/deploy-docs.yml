@@ -11,6 +11,62 @@ parameters:
   type: string
 
 jobs:
+- deployment: ${{ parameters.Environment }}_blob
+  condition: ${{ parameters.BuildCondition }}
+  dependsOn: build
+  environment: ${{ parameters.Environment }}-Azure
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - download: current
+            artifact: ${{ parameters.ArtifactName }}
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: docs-publish
+              scriptType: bash
+              scriptLocation: inlineScript
+              failOnStandardError: true
+              addSpnToEnvironment: true
+              inlineScript: |
+                export STORE_NAME="$(docs-storage-account)"
+                echo "Storage Account Name: $STORE_NAME"
+                export CONTAINER_NAME="${{ lower(parameters.Environment) }}-content"
+                echo "Container Name: $CONTAINER_NAME"
+
+                # RBAC WAY
+                # Requires addSpnToEnvironment task input to be true
+                export AZCOPY_AUTO_LOGIN_TYPE=SPN
+                export AZCOPY_SPA_APPLICATION_ID=$servicePrincipalId
+                export AZCOPY_SPA_CLIENT_SECRET=$servicePrincipalKey
+                export AZCOPY_TENANT_ID=$tenantId
+                echo "$(Pipeline.Workspace)/${{ parameters.DocsPath }}"
+                echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/"
+                azcopy sync \
+                    "$(Pipeline.Workspace)/${{ parameters.DocsPath }}" \
+                    "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/" \
+                    --delete-destination=true
+
+                # # SAS_TOKEN way
+                # # addSpnToEnvironment task input does not need to be set (defaults to false, will not be used if true)
+                # # SPN values are not needed
+                # EXPIRY=`date -u -d "5 minutes" '+%Y-%m-%dT%H:%MZ'` \
+                # && ACCOUNT_KEY=`az storage account keys list --account-name $STORE_NAME --query [1].value -o tsv` \
+                # && export SAS_TOKEN=$( az storage container generate-sas \
+                #     --account-key $ACCOUNT_KEY \
+                #     --account-name $STORE_NAME \
+                #     --name $CONTAINER_NAME \
+                #     --expiry $EXPIRY \
+                #     --permissions acdlrw \
+                #     --output tsv )
+                # echo "$(Pipeline.Workspace)/${{ parameters.DocsPath }}"
+                # echo "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}"
+                # azcopy sync \
+                #     "$(Pipeline.Workspace)/${{ parameters.DocsPath }}" \
+                #     "https://${STORE_NAME}.blob.core.windows.net/${CONTAINER_NAME}/${{ parameters.DocsPath }}/?${SAS_TOKEN}" \
+                #     --delete-destination=true
+            displayName: Copy Site to Azure Blob
+
 - deployment: ${{ parameters.Environment }}_windows
   condition: ${{ parameters.BuildCondition }}
   dependsOn: build
