@@ -101,6 +101,10 @@ jobs:
             }
             "group" {
                 $groupName = "${{ parameters.AuthGroupName }}"
+                if (-not $groupName) {
+                    Write-Host "##vso[task.logissue type=error]No Group Name was specified, please specify a group name in your azure-pipelines.yml file using the 'AuthGroupName' parameter."
+                    throw "No group specified"
+                }
                 $context = Get-AzContext
                 $graphToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.microsoft.com").AccessToken
                 Connect-MgGraph -AccessToken $graphToken
