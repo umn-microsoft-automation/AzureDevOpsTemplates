@@ -27,6 +27,13 @@ parameters:
 - name: AuthSetting
   type: string
   default: valid-user
+  values:
+  - valid-user
+  - unauthenticated
+  - group
+- name: AuthGroupName
+  type: string
+  default: ''
 
 jobs:
 - job: build
@@ -92,7 +99,7 @@ jobs:
             "pass" {
                 $output = "OIDCUnAuthAction pass"
             }
-            default {
+            "group" {
                 $context = Get-AzContext
                 $graphToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.microsoft.com").AccessToken
                 Connect-MgGraph -AccessToken $graphToken
@@ -110,6 +117,9 @@ jobs:
                     Write-Host "##vso[task.logissue type=error]The group $auth is not registered for this application, verify you have specified the correct group name in your azure-pipelines.yml file, and verify with SRE that they have registered the group correctly."
                     throw "Group not Valid"
                 }
+            }
+            default {
+                throw "invalid AuthSetting"
             }
         }
         Write-Host $output
